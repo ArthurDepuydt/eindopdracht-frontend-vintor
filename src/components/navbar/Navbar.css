@@ -15,3 +15,60 @@ nav {
   display: flex;
   gap: 0.5rem;
 }
+
+.nav-account__overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: -230%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  z-index: 20;
+}
+
+.nav-account__overlay.active {
+  display: flex;
+}
+
+.nav-account__overlay-item {
+  border: 1px solid rgba(var(--bg-rgb), 1);
+  padding: 12px;
+  width: 100%;
+  background-color: var(--primary);
+  font-weight: 500;
+  font-family: "Montserrat", sans-serif;
+}
+
+.nav-account__overlay-item:hover {
+  background-color: var(--secondary);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.nav-account__overlay-item:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.nav-account__overlay-item:last-child {
+  border-radius: 0 0 4px 4px;
+  border-top: none;
+}
+
+.nav-account__overlay-container {
+  position: relative;
+}
+
+@media (max-width: 992px) {
+  .logo {
+    width: 80px;
+  }
+}
+
+@media (max-width: 576px) {
+  .logo {
+    display: none;
+  }
+}
