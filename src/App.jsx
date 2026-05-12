@@ -4,10 +4,17 @@ import Logo from "./assets/logo.svg";
 import "./reset.css";
 import "./App.css";
 
+import Home from "./pages/home/Home";
+
 function App() {
   return (
     <>
-      <Navbar />
+      <header>
+        <Navbar />
+      </header>
+      <main>
+        <Home />
+      </main>
     </>
   );
 }
