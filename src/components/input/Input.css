@@ -1,0 +1,42 @@
+input {
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-size: 14px !important;
+  font-weight: 300 !important;
+}
+
+input::placeholder {
+  font-family: "Montserrat", sans-serif;
+}
+
+input.light {
+  background-color: var(--primary);
+  border: 2px solid rgba(var(--bg-rgb), 0.4);
+  color: var(--bg);
+}
+
+input.search {
+  min-width: 400px;
+  background-image: url("../../assets/search.svg");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+  padding-right: 40px;
+}
+
+input.search img {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  right: 16px;
+}
+
+input.light:focus {
+  border: 2px solid var(--bg);
+  box-shadow: none;
+  outline: none;
+}
+
+input.light::placeholder {
+  color: var(--bg);
+}

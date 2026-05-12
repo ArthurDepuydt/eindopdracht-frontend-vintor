@@ -1,0 +1,17 @@
+nav {
+  background-color: var(--primary);
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+  padding: 1rem;
+  flex-direction: row !important;
+  width: 100%;
+}
+
+.nav-icons {
+  display: flex;
+  gap: 0.5rem;
+}
