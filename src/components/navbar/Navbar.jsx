@@ -8,6 +8,11 @@ import Input from "../input/Input";
 function Navbar() {
   const [search, setSearch] = useState("");
 
+  function clickAccount() {
+    const overlay = document.querySelector(".nav-account__overlay");
+    overlay.classList.toggle("active");
+  }
+
   return (
     <>
       <nav>
@@ -23,8 +28,19 @@ function Navbar() {
             placeholder="Post of tag zoeken"
           />
           <div className="nav-icons">
-            <img src={Add} alt="Add item" className="logo" />
-            <img src={Account} alt="Account" className="logo" />
+            <img src={Add} alt="Add item" className="nav-add" />
+            <div className="nav-account__overlay-container">
+              <img
+                src={Account}
+                alt="Account"
+                className="nav-account"
+                onClick={clickAccount}
+              />
+              <div className="nav-account__overlay">
+                <div className="nav-account__overlay-item">Mijn posts</div>
+                <div className="nav-account__overlay-item">Uitloggen</div>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
