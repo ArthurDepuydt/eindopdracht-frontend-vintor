@@ -1,0 +1,41 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background-color: white;
+  max-width: 900px;
+  padding: 76px 20%;
+  box-shadow: var(--box-shadow);
+  border-radius: 8px;
+}
+
+@media (max-width: 992px) {
+  .login-container {
+    padding: 76px 10%;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
+.login-section {
+  display: flex;
+  justify-content: center;
+}
+
+.login-title {
+  text-align: center;
+}
+
+.login-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+.login-fields span {
+  text-align: center;
+  font-weight: 500;
+  font-family: "Montserrat", sans-serif;
+}

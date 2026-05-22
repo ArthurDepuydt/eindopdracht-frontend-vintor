@@ -4,3 +4,36 @@
   gap: 16px;
 }
 
+.sidebar-popular {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.sidebar-popular__title {
+  font-size: 20px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.sidebar-popular__tags {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-popular__tag {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background-color: var(--bg-alt);
+  padding: 8px 16px;
+  border-radius: 50px;
+  width: fit-content;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sidebar-popular__tag img {
+  width: 26px;
+}

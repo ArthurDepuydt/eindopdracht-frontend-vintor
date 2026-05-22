@@ -6,12 +6,13 @@ import ChevronLight from "../../assets/chevron.svg";
 
 import Account from "../../assets/accountdark.svg";
 import Add from "../../assets/add.svg";
+import { Link } from "react-router-dom";
 
 function SidebarButton({ buttonStyle, size }) {
   if (buttonStyle === "login") {
     return (
       <>
-        <button className={`sidebar-button secondary ${buttonStyle}`}>
+        <Link to="/login" className={`sidebar-button secondary ${buttonStyle}`}>
           <div className="sidebar-button__content">
             <img
               src={Account}
@@ -24,13 +25,16 @@ function SidebarButton({ buttonStyle, size }) {
             </div>
           </div>
           <img src={Chevron} alt="Chevron" className="sidebar-button__icon" />
-        </button>
+        </Link>
       </>
     );
   } else {
     return (
       <>
-        <button className={`sidebar-button primary ${buttonStyle}`}>
+        <Link
+          to="/post-maken"
+          className={`sidebar-button primary ${buttonStyle}`}
+        >
           <div className="sidebar-button__content ">
             <img
               src={Add}
@@ -47,7 +51,7 @@ function SidebarButton({ buttonStyle, size }) {
             alt="Chevron"
             className="sidebar-button__icon"
           />
-        </button>
+        </Link>
       </>
     );
   }

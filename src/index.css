@@ -1,5 +1,6 @@
 :root {
   --primary: #0e261d;
+  --primary-rgb: 14, 38, 29;
   --secondary: #6c7d6a;
   --accent: #c9a764;
   --bg: #fef9ef;
@@ -28,4 +29,9 @@ h4,
 h5,
 h6 {
   font-family: "Montserrat", sans-serif;
+}
+
+h1 {
+  font-size: 40px;
+  font-weight: 600;
 }
