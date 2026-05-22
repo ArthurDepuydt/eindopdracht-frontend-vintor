@@ -1,8 +1,11 @@
 input {
   padding: 10px 16px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 14px !important;
   font-weight: 300 !important;
+  box-shadow: none;
+  outline: none;
+  border: 1px solid rgba(var(--primary-rgb), 0.3);
 }
 
 input::placeholder {
@@ -58,4 +61,21 @@ input.light:focus {
 
 input.light::placeholder {
   color: var(--bg);
+}
+
+.input-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+label {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: "Montserrat", sans-serif;
+}
+
+input.text {
+  padding: 8px 12px;
 }

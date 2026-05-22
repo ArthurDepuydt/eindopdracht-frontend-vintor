@@ -1,0 +1,43 @@
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-wrapper label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 992px) {
+  .searchpage-title {
+    font-size: 24px;
+  }
+}
+
+.searchpage-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.searchpage-select {
+  padding: 8px 24px 8px 16px;
+  display: flex;
+  align-items: center;
+  width: 200px;
+  height: 55px;
+  border-radius: 8px;
+  appearance: none;
+  background-color: var(--bg);
+  background-image: url("../../assets/dropdown.svg");
+  background-repeat: no-repeat;
+  background-position: 90% center;
+  background-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}

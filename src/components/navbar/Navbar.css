@@ -34,7 +34,7 @@ nav {
 }
 
 .nav-account__overlay-item {
-  border: 1px solid rgba(var(--bg-rgb), 1);
+  border: 1.5px solid rgba(var(--bg-rgb), 1);
   padding: 12px;
   width: 100%;
   background-color: var(--primary);

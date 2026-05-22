@@ -1,0 +1,9 @@
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.checkbox-wrapper label {
+  font-size: 14px;
+  font-weight: 500;
+}

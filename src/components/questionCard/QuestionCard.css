@@ -1,0 +1,138 @@
+.question-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  padding: 16px;
+  background-color: white;
+  box-shadow: var(--box-shadow);
+  min-height: 200px;
+  border-radius: 8px;
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.question-card__image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.question-card__image-container {
+  position: relative;
+  flex-basis: 20%;
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+
+  @media (max-width: 768px) {
+    aspect-ratio: 2/1;
+    flex-basis: 100%;
+  }
+  @media (max-width: 576px) {
+    aspect-ratio: 4/3;
+  }
+}
+
+.question-card__content {
+  flex-basis: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  flex-grow: 1;
+  flex-shrink: 2;
+
+  @media (max-width: 768px) {
+    flex-basis: 100%;
+  }
+}
+
+.question-card__description {
+  max-width: 70%;
+  color: var(--light-grey-text);
+  @media (max-width: 1200px) {
+    max-width: 100%;
+  }
+}
+
+.question-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  @media (max-width: 1200px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+.question-card__author {
+  display: flex;
+  gap: 8px;
+  font-weight: 500;
+  align-items: center;
+}
+
+.question-card__author-container {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  @media (max-width: 992px) {
+    gap: 16px;
+  }
+}
+
+.question-card__info {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+  @media (max-width: 992px) {
+    flex-direction: column;
+    gap: 12px;
+    align-items: start;
+  }
+}
+
+.question-card__likes,
+.question-card__comments {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.question-card__stats {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  @media (max-width: 992px) {
+    gap: 16px;
+  }
+}
+
+.question-card__author-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.question-card__date {
+  color: var(--light-grey-text);
+  font-weight: 500;
+}
+
+.question-card__tags {
+  display: flex;
+  gap: 8px;
+}
+
+.question-card__tag {
+  background-color: var(--secondary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 40px;
+  font-size: 14px;
+}

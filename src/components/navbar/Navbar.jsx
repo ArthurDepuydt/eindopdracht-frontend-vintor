@@ -5,6 +5,8 @@ import Account from "../../assets/account.svg";
 import { useState } from "react";
 import Input from "../input/Input";
 
+import { Link } from "react-router-dom";
+
 function Navbar() {
   const [search, setSearch] = useState("");
 
@@ -37,8 +39,12 @@ function Navbar() {
                 onClick={clickAccount}
               />
               <div className="nav-account__overlay">
-                <div className="nav-account__overlay-item">Mijn posts</div>
-                <div className="nav-account__overlay-item">Uitloggen</div>
+                <Link to="mijn-posts" className="nav-account__overlay-item">
+                  Mijn posts
+                </Link>
+                <Link to="uitloggen" className="nav-account__overlay-item">
+                  Uitloggen
+                </Link>
               </div>
             </div>
           </div>
