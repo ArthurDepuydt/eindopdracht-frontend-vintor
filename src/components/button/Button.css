@@ -10,6 +10,10 @@ button.primary {
   transition: all 0.2s ease-in-out;
 }
 
+button.primary.wide {
+  padding: 12px 28px;
+}
+
 button.primary:hover {
   background-color: var(--secondary);
   cursor: pointer;
@@ -32,4 +36,24 @@ button.secondary {
 button.secondary:hover {
   background-color: white;
   cursor: pointer;
+}
+
+button.onInput {
+  height: 38.33px;
+  padding: 0 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+  width: 20%;
+}
+
+@media (max-width: 768px) {
+  button.onInput {
+    width: 30%;
+  }
+}
+
+@media (max-width: 576px) {
+  button.onInput {
+    width: 40%;
+  }
 }

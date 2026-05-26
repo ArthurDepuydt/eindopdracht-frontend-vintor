@@ -18,6 +18,11 @@ input.light {
   color: var(--bg);
 }
 
+input.onInput {
+  border-radius: 8px 0 0 8px;
+  width: 80%;
+}
+
 .input-wrapper {
   position: relative;
   display: inline-block;
@@ -78,4 +83,16 @@ label {
 
 input.text {
   padding: 8px 12px;
+}
+
+@media (max-width: 768px) {
+  input.onInput {
+    width: 70%;
+  }
+}
+
+@media (max-width: 576px) {
+  input.onInput {
+    width: 60%;
+  }
 }

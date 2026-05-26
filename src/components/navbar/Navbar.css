@@ -40,6 +40,7 @@ nav {
   background-color: var(--primary);
   font-weight: 500;
   font-family: "Montserrat", sans-serif;
+  color: var(--bg) !important;
 }
 
 .nav-account__overlay-item:hover {

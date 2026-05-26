@@ -11,9 +11,14 @@
   width: 100%;
   border-radius: 8px;
   text-align: start;
+  gap: 16px;
   @media (max-width: 1200px) {
     padding: 12px 20px;
   }
+}
+
+.sidebar-button.small {
+  padding: 12px 20px;
 }
 
 .sidebar-button.primary {
