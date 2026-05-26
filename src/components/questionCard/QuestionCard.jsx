@@ -26,9 +26,9 @@ function QuestionCard({
             <img src={image} alt={title} className="question-card__image" />
           </div>
           <div className="question-card__content">
-            <h2 className="question-card__title myposts">{title}</h2>
-            <p className="question-card__description myposts">{description}</p>
-            <div className="question-card__meta myposts">
+            <h2 className="question-card__title my-posts">{title}</h2>
+            <p className="question-card__description my-posts">{description}</p>
+            <div className="question-card__meta my-posts">
               <div className="question-card__info">
                 <span className="question-card__stats">
                   <span className="question-card__comments">
@@ -56,7 +56,7 @@ function QuestionCard({
                   <span></span>
                 </button>
               </div>
-              <div className="question-card__tags-container myposts">
+              <div className="question-card__tags-container my-posts">
                 <div className="question-card__tags">
                   {tags.map((tag, index) => (
                     <span key={index} className="question-card__tag">

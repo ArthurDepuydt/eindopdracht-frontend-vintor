@@ -9,14 +9,14 @@
   font-weight: 500;
 }
 
-.myposts-header {
+.my-posts-header {
   display: flex;
   align-items: center;
   gap: 16px;
   justify-content: space-between;
 }
 
-.myposts-select {
+.my-posts-select {
   padding: 8px 24px 8px 16px;
   display: flex;
   align-items: center;
@@ -37,13 +37,13 @@
 }
 
 @media (max-width: 992px) {
-  .myposts-title {
+  .my-posts-title {
     font-size: 24px;
   }
 }
 
 @media (max-width: 768px) {
-  .myposts-header {
+  .my-posts-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;

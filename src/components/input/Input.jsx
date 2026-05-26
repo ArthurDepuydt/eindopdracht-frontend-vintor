@@ -58,7 +58,24 @@ function Input({ value, setValue, type, id, name, label, style, placeholder }) {
         </>
       );
     }
-  } else
+  } else if (type === "textarea") {
+    return (
+      <>
+        <div className="input-text-wrapper">
+          <label htmlFor={name}>{label}</label>
+          <textarea
+            id={id}
+            name={name}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={placeholder}
+            className={style}
+            rows="4"
+          />
+        </div>
+      </>
+    );
+  } else {
     return (
       <>
         <div className="input-text-wrapper">
@@ -75,6 +92,7 @@ function Input({ value, setValue, type, id, name, label, style, placeholder }) {
         </div>
       </>
     );
+  }
 }
 
 export default Input;

@@ -10,13 +10,13 @@ function MyPosts() {
   return (
     <>
       <div className="container">
-        <section className="myposts-header">
-          <h1 className="myposts-title">Mijn posts (2)</h1>
+        <section className="my-posts-header">
+          <h1 className="my-posts-title">Mijn posts (2)</h1>
           <div>
             <SidebarButton buttonStyle="post" size="small" />
           </div>
         </section>
-        <section className="myposts-results mt-3">
+        <section className="my-posts-results mt-3">
           <QuestionCard
             image={placeholder}
             title="Carburateur afstellen of vervangen?"
