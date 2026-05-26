@@ -12,7 +12,10 @@ function SidebarButton({ buttonStyle, size }) {
   if (buttonStyle === "login") {
     return (
       <>
-        <Link to="/login" className={`sidebar-button secondary ${buttonStyle}`}>
+        <Link
+          to="/login"
+          className={`sidebar-button secondary ${buttonStyle} ${size}`}
+        >
           <div className="sidebar-button__content">
             <img
               src={Account}
@@ -32,13 +35,13 @@ function SidebarButton({ buttonStyle, size }) {
     return (
       <>
         <Link
-          to="/post-maken"
-          className={`sidebar-button primary ${buttonStyle}`}
+          to="/nieuwe-post"
+          className={`sidebar-button primary ${buttonStyle} ${size}`}
         >
           <div className="sidebar-button__content ">
             <img
               src={Add}
-              alt="Account"
+              alt="Add"
               className="sidebar-button__account primary"
             />
             <div className="sidebar-button__text primary">
