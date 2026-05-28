@@ -19,7 +19,9 @@ function Navbar() {
     <>
       <nav>
         <div className="container nav-container">
-          <img src={Logo} alt="Vintor logo" className="logo" />
+          <Link to="/">
+            <img src={Logo} alt="Vintor logo" className="logo" />
+          </Link>
           <Input
             type="text"
             id="search"
@@ -30,7 +32,9 @@ function Navbar() {
             placeholder="Post of tag zoeken"
           />
           <div className="nav-icons">
-            <img src={Add} alt="Add item" className="nav-add" />
+            <Link to="/nieuwe-post" className="nav-add-link">
+              <img src={Add} alt="Add item" className="nav-add" />
+            </Link>
             <div className="nav-account__overlay-container">
               <img
                 src={Account}
@@ -39,10 +43,10 @@ function Navbar() {
                 onClick={clickAccount}
               />
               <div className="nav-account__overlay">
-                <Link to="mijn-posts" className="nav-account__overlay-item">
+                <Link to="/mijn-posts" className="nav-account__overlay-item">
                   Mijn posts
                 </Link>
-                <Link to="uitloggen" className="nav-account__overlay-item">
+                <Link to="/uitloggen" className="nav-account__overlay-item">
                   Uitloggen
                 </Link>
               </div>

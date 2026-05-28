@@ -49,6 +49,10 @@ nav {
   cursor: pointer;
 }
 
+.nav-add-link {
+  display: flex;
+}
+
 .nav-account__overlay-item:first-child {
   border-radius: 4px 4px 0 0;
 }
