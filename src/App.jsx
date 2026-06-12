@@ -9,6 +9,7 @@ import Searchpage from "./pages/searchpage/Searchpage";
 import Post from "./pages/post/Post";
 import MyPosts from "./pages/myPosts/MyPosts";
 import NewPost from "./pages/newPost/NewPost";
+import EditPost from "./pages/editPost/EditPost";
 
 import { Routes, Route } from "react-router-dom";
 
@@ -27,6 +28,7 @@ function App() {
           <Route path="/posts/:id" element={<Post />} />
           <Route path="/mijn-posts" element={<MyPosts />} />
           <Route path="/nieuwe-post" element={<NewPost />} />
+          <Route path="/post-aanpassen/:id" element={<EditPost />} />
         </Routes>
       </main>
     </>

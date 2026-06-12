@@ -17,6 +17,10 @@
   }
 }
 
+.sidebar-button.login {
+  box-shadow: var(--box-shadow);
+}
+
 .sidebar-button.small {
   padding: 12px 20px;
 }

@@ -1,4 +1,4 @@
-import "./NewPost.css";
+import "./EditPost.css";
 
 import Select from "react-select";
 
@@ -11,7 +11,7 @@ import Button from "../../components/button/Button";
 
 import placeholder from "../../assets/placeholder.jpg";
 
-function NewPost() {
+function EditPost() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
@@ -95,7 +95,7 @@ function NewPost() {
           <section className="new-post__section">
             <section className="new-post__header">
               <div className="new-post__content">
-                <h1 className="new-post__title">Nieuwe post maken</h1>
+                <h1 className="new-post__title">Post aanpassen</h1>
               </div>
             </section>
             <section className="new-post__main">
@@ -212,7 +212,7 @@ function NewPost() {
                   ></Button>
                   <Button
                     type="submit"
-                    value="Plaatsen"
+                    value="Opslaan"
                     style="primary wide"
                   ></Button>
                 </div>
@@ -227,4 +227,4 @@ function NewPost() {
     </>
   );
 }
-export default NewPost;
+export default EditPost;

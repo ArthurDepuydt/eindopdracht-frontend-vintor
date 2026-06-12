@@ -8,6 +8,20 @@ input {
   border: 1px solid rgba(var(--primary-rgb), 0.3);
 }
 
+textarea {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px !important;
+  font-weight: 300 !important;
+  box-shadow: none;
+  outline: none;
+  border: 1px solid rgba(var(--primary-rgb), 0.3);
+}
+
+textarea::placeholder {
+  font-family: "Montserrat", sans-serif;
+}
+
 input::placeholder {
   font-family: "Montserrat", sans-serif;
 }
