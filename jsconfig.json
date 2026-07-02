@@ -5,6 +5,6 @@
     "moduleResolution": "bundler",
     "target": "ES6"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/context"],
   "exclude": ["node_modules", "dist"]
 }
