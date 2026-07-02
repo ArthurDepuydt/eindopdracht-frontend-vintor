@@ -1,26 +1,116 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Home.css";
 import QuestionCard from "../../components/questionCard/QuestionCard";
 import Sidebar from "../../components/sidebar/Sidebar";
 import placeholder from "../../assets/placeholder.jpg";
+import usericon from "../../assets/usericon.svg";
+import axios from "axios";
+
+const API_HEADERS = {
+  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+};
+const BASE_URL = "https://novi-backend-api-wgsgz.ondigitalocean.app/api";
+const DOMAIN = "https://novi-backend-api-wgsgz.ondigitalocean.app";
 
 function Home() {
+  const [enrichedPosts, setEnrichedPosts] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
+  async function fetchAll() {
+    try {
+      const postsResponse = await axios.get(`${BASE_URL}/posts`, {
+        headers: API_HEADERS,
+      });
+      const usersResponse = await axios.get(`${BASE_URL}/users`, {
+        headers: API_HEADERS,
+      });
+      const commentsResponse = await axios.get(`${BASE_URL}/comments`, {
+        headers: API_HEADERS,
+      });
+      const tagsPostResponse = await axios.get(`${BASE_URL}/postTags`, {
+        headers: API_HEADERS,
+      });
+      const tagsResponse = await axios.get(`${BASE_URL}/tags`, {
+        headers: API_HEADERS,
+      });
+
+      const posts = postsResponse.data;
+      const users = usersResponse.data;
+      const comments = commentsResponse.data;
+      const allPostTags = tagsPostResponse.data;
+      const allTags = tagsResponse.data;
+
+      const merged = [];
+
+      for (let i = 0; i < posts.length; i++) {
+        const post = posts[i];
+
+        const author = users.find((user) => user.id === post.authorId);
+        const postComments = comments.filter(
+          (comment) => comment.postId === post.id,
+        );
+
+        const postTags = allPostTags.filter((pt) => pt.postId === post.id);
+        const tags = postTags.map((pt) => {
+          const tag = allTags.find((t) => t.id === pt.tagId);
+          return tag ? tag.name : null;
+        });
+
+        merged.push({
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          likes: post.likes,
+          image: post.image,
+          dateCreated: post.dateCreated,
+          author: author,
+          comments: postComments,
+          tags: tags,
+        });
+      }
+
+      setEnrichedPosts(merged);
+      console.log("Merged data:", merged);
+    } catch (error) {
+      console.error("Er ging iets mis bij het ophalen van de data:", error);
+      setError("Er ging iets mis bij het ophalen van de data.");
+    }
+  }
+
   return (
     <>
       <div className="container">
         <div className="home-wrapper">
           <section className="questions-section">
-            <QuestionCard
-              image={placeholder}
-              title="Carburateur afstellen of vervangen?"
-              description="Mijn motor draait onregelmatig stationair en valt soms uit. Denk dat het aan de carburateur ligt. Is het de moeite om die nog af te stellen of beter meteen vervangen?"
-              author="John Doe"
-              authorImage={placeholder}
-              date="1 uur geleden"
-              tags={["carburateur", "restauratie"]}
-              likes={10}
-              comments={5}
-            />
+            {error ? (
+              <p>{error}</p>
+            ) : enrichedPosts.length > 0 ? (
+              enrichedPosts.map((post) => (
+                <QuestionCard
+                  id={post.id}
+                  key={post.id}
+                  image={post.image ? `${DOMAIN}${post.image}` : placeholder}
+                  title={post.title}
+                  description={post.description}
+                  author={post.author?.email}
+                  authorImage={usericon}
+                  date={new Date(post.dateCreated).toLocaleDateString("nl-NL", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  likes={post.likes}
+                  comments={post.comments.length}
+                  tags={post.tags}
+                />
+              ))
+            ) : (
+              <p>Posts zijn aan het laden...</p>
+            )}
           </section>
           <section className="sidebar-section">
             <Sidebar showPost={true} showTags={true} showLogin={true} />
@@ -30,4 +120,5 @@ function Home() {
     </>
   );
 }
+
 export default Home;

@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+import { useParams } from "react-router-dom";
+
 import "./Post.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import placeholder from "../../assets/placeholder.jpg";
+
+import usericon from "../../assets/usericon.svg";
 
 import Input from "../../components/input/Input";
 
@@ -9,150 +14,233 @@ import { Navigation, Pagination } from "swiper/modules";
 
 import likesIcon from "../../assets/likes.svg";
 
-// Import Swiper React components
+import axios from "axios";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 
-// Import Swiper styles
+const API_HEADERS = {
+  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+};
+
+const BASE_URL = "https://novi-backend-api-wgsgz.ondigitalocean.app/api";
+const DOMAIN = "https://novi-backend-api-wgsgz.ondigitalocean.app";
+
 import "swiper/css";
 
 function Post() {
-  let [reactie, setReactie] = useState("");
+  let params = useParams();
+
+  const [reactie, setReactie] = useState("");
+  const [enrichedPost, setEnrichedPost] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchPost();
+  }, []);
+
+  async function fetchPost() {
+    try {
+      const postsResponse = await axios.get(`${BASE_URL}/posts/${params.id}`, {
+        headers: API_HEADERS,
+      });
+      const usersResponse = await axios.get(`${BASE_URL}/users`, {
+        headers: API_HEADERS,
+      });
+      const commentsResponse = await axios.get(`${BASE_URL}/comments`, {
+        headers: API_HEADERS,
+      });
+      const tagsPostResponse = await axios.get(`${BASE_URL}/postTags`, {
+        headers: API_HEADERS,
+      });
+      const tagsResponse = await axios.get(`${BASE_URL}/tags`, {
+        headers: API_HEADERS,
+      });
+      const postImagesResponse = await axios.get(`${BASE_URL}/postImages`, {
+        headers: API_HEADERS,
+      });
+
+      const post = postsResponse.data;
+      const users = usersResponse.data;
+      const comments = commentsResponse.data;
+      const allPostTags = tagsPostResponse.data;
+      const allTags = tagsResponse.data;
+      const postImages = postImagesResponse.data;
+
+      const author = users.find((user) => user.id === post.authorId);
+      const postComments = comments.filter(
+        (comment) => comment.postId === post.id,
+      );
+      const commentsWithAuthors = postComments.map((comment) => {
+        const commentAuthor = users.find(
+          (user) => user.id === comment.authorId,
+        );
+        return {
+          id: comment.id,
+          postId: comment.postId,
+          authorId: comment.authorId,
+          content: comment.content,
+          dateCreated: comment.dateCreated,
+          author: commentAuthor,
+        };
+      });
+      const postTags = allPostTags.filter((pt) => pt.postId === post.id);
+      const tags = postTags.map((pt) => {
+        const tag = allTags.find((t) => t.id === pt.tagId);
+        return tag ? tag.name : null;
+      });
+      const postImageAssembled = postImages
+        .filter((pi) => pi.postId === post.id)
+        .map((pi) => pi.image);
+      const allImages = [post.image, ...postImageAssembled];
+
+      setEnrichedPost({
+        id: post.id,
+        title: post.title,
+        description: post.description,
+        likes: post.likes,
+        images: allImages,
+        dateCreated: post.dateCreated,
+        author: author,
+        comments: commentsWithAuthors,
+        tags: tags,
+      });
+    } catch (error) {
+      console.error("Er ging iets mis bij het ophalen van de data:", error);
+      setError("Er ging iets mis bij het ophalen van de data.");
+    }
+  }
+  
+
+  const username = enrichedPost?.author
+    ? enrichedPost.author.email.split("@")[0]
+    : "Onbekend";
 
   return (
     <>
       <div className="container">
         <div className="post-detail__wrapper">
           <section className="post-detail__section">
-            <section className="post-detail__header">
-              <Swiper
-                modules={[Navigation, Pagination]}
-                spaceBetween={50}
-                slidesPerView={1}
-                navigation
-                pagination={{ clickable: true }}
-                onSlideChange={() => console.log("slide change")}
-                onSwiper={(swiper) => console.log(swiper)}
-                className="post-detail__swiper"
-              >
-                <SwiperSlide>
-                  <img
-                    src={placeholder}
-                    className="post-detail__swiper-image"
-                    alt="Placeholder"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src={placeholder}
-                    className="post-detail__swiper-image"
-                    alt="Placeholder"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src={placeholder}
-                    className="post-detail__swiper-image"
-                    alt="Placeholder"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src={placeholder}
-                    className="post-detail__swiper-image"
-                    alt="Placeholder"
-                  />
-                </SwiperSlide>
-              </Swiper>
-              <div className="post-detail__content">
-                <h1 className="post-detail__title">
-                  Carburateur afstellen of vervangen?
-                </h1>
-
-                <div className="post-detail__author-container">
-                  <div className="post-detail__author">
-                    <img
-                      src={placeholder}
-                      alt="Placeholder"
-                      className="post-detail__author-image"
-                    />
-                    <span>Author Name</span>
-                  </div>
-                  <span className="post-detail__date">Date</span>
-                </div>
-                <div className="post-detail__tags-container mt-2 mb-2">
-                  <div className="post-detail__tags">
-                    {["carburateur", "restauratie"].map((tag, index) => (
-                      <span key={index} className="post-detail__tag">
-                        {tag}
-                      </span>
+            {error ? (
+              <p>{error}</p>
+            ) : enrichedPost ? (
+              <div>
+                <section className="post-detail__header">
+                  <Swiper
+                    modules={[Navigation, Pagination]}
+                    spaceBetween={50}
+                    slidesPerView={1}
+                    navigation
+                    pagination={{ clickable: true }}
+                    className="post-detail__swiper"
+                  >
+                    {enrichedPost.images.map((image, index) => (
+                      <SwiperSlide key={index}>
+                        <img
+                          src={image ? `${DOMAIN}${image}` : placeholder}
+                          className="post-detail__swiper-image"
+                          alt="Placeholder"
+                        />
+                      </SwiperSlide>
                     ))}
+                  </Swiper>
+                  <div className="post-detail__content">
+                    <h1 className="post-detail__title">{enrichedPost.title}</h1>
+
+                    <div className="post-detail__author-container">
+                      <div className="post-detail__author">
+                        <img
+                          src={usericon}
+                          alt="User Icon"
+                          className="post-detail__author-image"
+                        />
+                        <span>{username}</span>
+                      </div>
+                      <span className="post-detail__date">
+                        {new Date(enrichedPost.dateCreated).toLocaleDateString(
+                          "nl-NL",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          },
+                        )}
+                      </span>
+                    </div>
+                    <div className="post-detail__tags-container mt-2 mb-2">
+                      <div className="post-detail__tags">
+                        {enrichedPost.tags.map((tag, index) => (
+                          <span key={index} className="post-detail__tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <span className="post-detail__stats">
+                      <span className="post-detail__likes">
+                        <img src={likesIcon} alt="Likes" />
+                        {enrichedPost.likes}
+                      </span>
+                    </span>
                   </div>
-                </div>
-                <span className="post-detail__stats">
-                  <span className="post-detail__likes">
-                    <img src={likesIcon} alt="Likes" />
-                    34
-                  </span>
-                </span>
+                </section>
+                <section className="post-detail__main mt-5">
+                  <p className="post-detail__description">
+                    {enrichedPost.description}
+                  </p>
+                  <hr className="post-detail__divider mt-5 mb-5" />
+                </section>
+                <section className="post-detail__reactions">
+                  <h2 className="post-detail__reactions-title">
+                    Reacties({enrichedPost.comments.length})
+                  </h2>
+
+                  {enrichedPost.comments.map((comment) => (
+                    <article className="reaction" key={comment.id}>
+                      <img
+                        src={usericon}
+                        alt="User Icon"
+                        className="reaction-author__image"
+                      />
+                      <div className="reaction-content">
+                        <div className="reaction-author">
+                          <span>
+                            {comment.author
+                              ? comment.author.email.split("@")[0]
+                              : "Onbekend"}
+                          </span>
+                          <span className="reaction-date">
+                            {new Date(comment.dateCreated).toLocaleDateString(
+                              "nl-NL",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              },
+                            )}
+                          </span>
+                        </div>
+                        <p className="reaction-description">
+                          {comment.content}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+
+                  <hr className="post-detail__divider mt-5 mb-5" />
+                  <Input
+                    type="reactie"
+                    id="reactie"
+                    name="reactie"
+                    value={reactie}
+                    setValue={setReactie}
+                    style="text onInput"
+                    placeholder="Schrijf een reactie"
+                  />
+                </section>
               </div>
-            </section>
-            <section className="post-detail__main mt-5">
-              <p className="post-detail__description">
-                Mijn motor draait onregelmatig stationair en valt soms uit. Denk
-                dat het aan de carburateur ligt. Is het de moeite om die nog af
-                te stellen of beter meteen vervangen?
-              </p>
-              <hr className="post-detail__divider mt-5 mb-5" />
-            </section>
-            <section className="post-detail__reactions">
-              <h2 className="post-detail__reactions-title">Reacties(2)</h2>
-              <article className="reaction">
-                <img
-                  src={placeholder}
-                  alt="Placeholder"
-                  className="reaction-author__image"
-                />
-                <div className="reaction-content">
-                  <div className="reaction-author">
-                    <span>Reactie Auteur</span>
-                    <span className="reaction-date">Datum</span>
-                  </div>
-                  <p className="reaction-description">
-                    Ik zou eerst proberen de carburateur af te stellen, soms kan
-                    dat al veel verschil maken. Als dat niet helpt, dan zou ik
-                    inderdaad overwegen om hem te vervangen.
-                  </p>
-                </div>
-              </article>
-              <article className="reaction">
-                <img
-                  src={placeholder}
-                  alt="Placeholder"
-                  className="reaction-author__image"
-                />
-                <div className="reaction-content">
-                  <div className="reaction-author">
-                    <span>Reactie Auteur</span>
-                    <span className="reaction-date">Datum</span>
-                  </div>
-                  <p className="reaction-description">
-                    Ik zou eerst proberen de carburateur af te stellen, soms kan
-                    dat al veel verschil maken. Als dat niet helpt, dan zou ik
-                    inderdaad overwegen om hem te vervangen.
-                  </p>
-                </div>
-              </article>
-              <hr className="post-detail__divider mt-5 mb-5" />
-              <Input
-                type="reactie"
-                id="reactie"
-                name="reactie"
-                value={reactie}
-                setValue={setReactie}
-                style="text onInput"
-                placeholder="Schrijf een reactie"
-              />
-            </section>
+            ) : (
+              <p>Post is aan het laden...</p>
+            )}
           </section>
           <section className="sidebar-section">
             <Sidebar showPost={true} showTags={true} showLogin={true} />

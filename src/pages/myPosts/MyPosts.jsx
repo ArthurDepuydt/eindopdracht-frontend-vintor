@@ -7,6 +7,26 @@ import SidebarButton from "../../components/sidebarButton/SidebarButton";
 import placeholder from "../../assets/placeholder.jpg";
 
 function MyPosts() {
+  async function getMyPosts(userId) {
+    try {
+      const loginPost = await axios.post(
+        `https://novi-backend-api-wgsgz.ondigitalocean.app/api/users/${userId}/posts`,
+        {
+          headers: API_HEADERS,
+        },
+      );
+      setResult(loginPost.data);
+      console.log(loginPost.data.token);
+      login(e, mail, loginPost.data.token);
+    } catch (error) {
+      console.error(error);
+    }
+
+    console.log(
+      `Gebruiker is ingelogd! Emailadres: ${mail}, Wachtwoord: ${password}`,
+    );
+  }
+
   return (
     <>
       <div className="container">
