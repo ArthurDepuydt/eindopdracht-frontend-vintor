@@ -15,6 +15,9 @@ import { Navigation, Pagination } from "swiper/modules";
 import likesIcon from "../../assets/likes.svg";
 import likedIcon from "../../assets/liked.svg";
 
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext.jsx";
+
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -30,6 +33,8 @@ const DOMAIN = "https://novi-backend-api-wgsgz.ondigitalocean.app";
 import "swiper/css";
 
 function Post() {
+  const { isAuth } = useContext(AuthContext);
+
   let params = useParams();
 
   const [reactie, setReactie] = useState("");
@@ -44,11 +49,13 @@ function Post() {
 
   useEffect(() => {
     fetchPost();
-    const token = localStorage.getItem("token");
-    console.log("Token bij useEffect:", token);
-    const decodedToken = jwtDecode(token);
-    const userId = decodedToken.userId;
-    setActualUserId(userId);
+    if (isAuth) {
+      const token = localStorage.getItem("token");
+      console.log("Token bij useEffect:", token);
+      const decodedToken = jwtDecode(token);
+      const userId = decodedToken.userId;
+      setActualUserId(userId);
+    }
   }, []);
 
   async function fetchPost() {

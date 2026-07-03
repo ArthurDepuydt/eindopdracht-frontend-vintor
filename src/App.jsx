@@ -11,9 +11,14 @@ import MyPosts from "./pages/myPosts/MyPosts";
 import NewPost from "./pages/newPost/NewPost";
 import EditPost from "./pages/editPost/EditPost";
 
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext.jsx";
+
 import { Routes, Route } from "react-router-dom";
 
 function App() {
+  const { isAuth } = useContext(AuthContext);
+
   return (
     <>
       <header>
@@ -26,9 +31,18 @@ function App() {
           <Route path="/registreren" element={<Register />} />
           <Route path="/zoeken/:id" element={<Searchpage />} />
           <Route path="/posts/:id" element={<Post />} />
-          <Route path="/mijn-posts" element={<MyPosts />} />
-          <Route path="/nieuwe-post" element={<NewPost />} />
-          <Route path="/post-aanpassen/:id" element={<EditPost />} />
+          <Route
+            path="/mijn-posts"
+            element={isAuth ? <MyPosts /> : <Login />}
+          />
+          <Route
+            path="/nieuwe-post"
+            element={isAuth ? <NewPost /> : <Login />}
+          />
+          <Route
+            path="/post-aanpassen/:id"
+            element={isAuth ? <EditPost /> : <Login />}
+          />
         </Routes>
       </main>
     </>
