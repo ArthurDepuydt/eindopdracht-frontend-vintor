@@ -14,20 +14,65 @@ const API_HEADERS = {
   "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
 };
 
+const BASE_URL = "https://novi-backend-api-wgsgz.ondigitalocean.app/api";
+
 function Register() {
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [result, setResult] = useState(null);
+  const [nameError, setNameError] = useState(null);
+  const [mailError, setMailError] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
 
   const navigate = useNavigate();
+
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const NAME_MIN = 2;
+  const NAME_MAX = 50;
+  const PASSWORD_MIN = 8;
+
+  function validateForm() {
+    let isValid = true;
+
+    if (name.trim().length < NAME_MIN || name.trim().length > NAME_MAX) {
+      setNameError(
+        `Naam moet tussen ${NAME_MIN} en ${NAME_MAX} karakters lang zijn.`,
+      );
+      isValid = false;
+    } else {
+      setNameError(null);
+    }
+
+    if (!EMAIL_REGEX.test(mail.trim())) {
+      setMailError("Vul een geldig e-mailadres in.");
+      isValid = false;
+    } else {
+      setMailError(null);
+    }
+
+    if (password.length < PASSWORD_MIN) {
+      setPasswordError(
+        `Wachtwoord moet minstens ${PASSWORD_MIN} karakters lang zijn.`,
+      );
+      isValid = false;
+    } else {
+      setPasswordError(null);
+    }
+
+    return isValid;
+  }
 
   async function registerFunction(e) {
     e.preventDefault();
 
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const registerPost = await axios.post(
-        "https://novi-backend-api-wgsgz.ondigitalocean.app/api/users",
+        `${BASE_URL}/users`,
         {
           email: mail,
           password: password,
@@ -65,6 +110,7 @@ function Register() {
               setValue={setName}
               style="text"
               placeholder="Naam"
+              error={nameError}
             />
             <Input
               label="E-mailadres"
@@ -75,6 +121,7 @@ function Register() {
               setValue={setMail}
               style="text"
               placeholder="E-mailadres"
+              error={mailError}
             />
             <Input
               label="Wachtwoord"
@@ -85,6 +132,7 @@ function Register() {
               setValue={setPassword}
               style="text"
               placeholder="Wachtwoord"
+              error={passwordError}
             />
 
             <div className="checkbox-wrapper">

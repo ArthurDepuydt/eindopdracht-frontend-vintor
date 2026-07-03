@@ -195,6 +195,12 @@
   margin: 0;
 }
 
+.new-post__upload-error {
+  font-size: 13px;
+  color: #d92d20;
+  margin: 0;
+}
+
 .new-post__preview-grid {
   display: flex;
   flex-wrap: wrap;

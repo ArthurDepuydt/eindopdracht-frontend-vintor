@@ -82,10 +82,27 @@ input.light::placeholder {
   color: var(--bg);
 }
 
+textarea.comment-input {
+  height: 38.33px;
+  overflow: hidden;
+  border-radius: 8px 0 0 8px;
+  width: 80%;
+}
+
 .input-text-wrapper {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
+}
+
+.input-error-message {
+  font-size: 13px;
+  color: #d92d20;
+}
+
+.textarea-wrapper {
+  display: flex;
   width: 100%;
 }
 
@@ -100,13 +117,13 @@ input.text {
 }
 
 @media (max-width: 768px) {
-  input.onInput {
+  textarea.comment-input {
     width: 70%;
   }
 }
 
 @media (max-width: 576px) {
-  input.onInput {
+  textarea.comment-input {
     width: 60%;
   }
 }
