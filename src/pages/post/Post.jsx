@@ -15,6 +15,7 @@ import { Navigation, Pagination } from "swiper/modules";
 import likesIcon from "../../assets/likes.svg";
 
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -33,9 +34,17 @@ function Post() {
   const [reactie, setReactie] = useState("");
   const [enrichedPost, setEnrichedPost] = useState(null);
   const [error, setError] = useState(null);
+  const [actualUserId, setActualUserId] = useState(null);
+
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     fetchPost();
+    const token = localStorage.getItem("token");
+    console.log("Token bij useEffect:", token);
+    const decodedToken = jwtDecode(token);
+    const userId = decodedToken.userId;
+    setActualUserId(userId);
   }, []);
 
   async function fetchPost() {
@@ -114,39 +123,17 @@ function Post() {
     e.preventDefault();
     try {
       const postPayload = {
-        title: title,
-        description: description,
-        likes: 0,
+        postId: parseInt(params.id),
         authorId: actualUserId,
+        content: reactie,
         dateCreated: new Date().toISOString(),
       };
 
-      const newPost = await axios.post(`${BASE_URL}/posts`, postPayload, {
+      await axios.post(`${BASE_URL}/comments`, postPayload, {
         headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
       });
-      for (let i = 0; i < selectedTags.length; i++) {
-        const tag = selectedTags[i];
-        await axios.post(
-          `${BASE_URL}/postTags`,
-          {
-            postId: newPost.data.id,
-            tagId: tag.value,
-          },
-          { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
-        );
-      }
-
-      for (let i = 0; i < selectedImages.length; i++) {
-        const image = selectedImages[i];
-        const formData = new FormData();
-        formData.append("postId", newPost.data.id);
-        formData.append("image", image);
-        await axios.post(`${BASE_URL}/postImages`, formData, {
-          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-        });
-      }
-
-      navigate(`/posts/${newPost.data.id}`);
+      setReactie("");
+      fetchPost();
     } catch (error) {
       console.error("Error submitting new post:", error);
     }
