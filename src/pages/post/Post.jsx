@@ -13,6 +13,7 @@ import Input from "../../components/input/Input";
 import { Navigation, Pagination } from "swiper/modules";
 
 import likesIcon from "../../assets/likes.svg";
+import likedIcon from "../../assets/liked.svg";
 
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -35,6 +36,9 @@ function Post() {
   const [enrichedPost, setEnrichedPost] = useState(null);
   const [error, setError] = useState(null);
   const [actualUserId, setActualUserId] = useState(null);
+
+  const likedPosts = JSON.parse(localStorage.getItem("likedPosts")) || [];
+  const isLiked = enrichedPost && likedPosts.includes(enrichedPost.id);
 
   const token = localStorage.getItem("token");
 
@@ -112,11 +116,46 @@ function Post() {
         author: author,
         comments: commentsWithAuthors,
         tags: tags,
+        authorId: post.authorId,
       });
     } catch (error) {
       console.error("Er ging iets mis bij het ophalen van de data:", error);
       setError("Er ging iets mis bij het ophalen van de data.");
     }
+  }
+
+  function toggleLike() {
+    const likedPosts = JSON.parse(localStorage.getItem("likedPosts")) || [];
+    const alreadyLiked = likedPosts.includes(enrichedPost.id);
+
+    const newLikes = alreadyLiked
+      ? enrichedPost.likes - 1
+      : enrichedPost.likes + 1;
+
+    axios
+      .put(
+        `${BASE_URL}/posts/${enrichedPost.id}`,
+        {
+          title: enrichedPost.title,
+          description: enrichedPost.description,
+          likes: newLikes,
+          authorId: enrichedPost.authorId,
+          dateCreated: enrichedPost.dateCreated,
+          id: enrichedPost.id,
+        },
+        { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
+      )
+      .then(() => {
+        const updatedLikedPosts = alreadyLiked
+          ? likedPosts.filter((postId) => postId !== enrichedPost.id)
+          : [...likedPosts, enrichedPost.id];
+
+        localStorage.setItem("likedPosts", JSON.stringify(updatedLikedPosts));
+        setEnrichedPost((prev) => ({ ...prev, likes: newLikes }));
+      })
+      .catch((error) => {
+        console.error("Error toggling like:", error);
+      });
   }
 
   async function createComment(e) {
@@ -214,9 +253,18 @@ function Post() {
                       </div>
                     </div>
                     <span className="post-detail__stats">
-                      <span className="post-detail__likes">
-                        <img src={likesIcon} alt="Likes" />
-                        {enrichedPost.likes}
+                      <span className="post-detail__likes" onClick={toggleLike}>
+                        {isLiked ? (
+                          <>
+                            <img src={likedIcon} alt="Likes" />
+                            {enrichedPost.likes}
+                          </>
+                        ) : (
+                          <>
+                            <img src={likesIcon} alt="Likes" />
+                            {enrichedPost.likes}
+                          </>
+                        )}
                       </span>
                     </span>
                   </div>

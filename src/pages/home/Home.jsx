@@ -59,7 +59,7 @@ function Home() {
         );
 
         const postTags = allPostTags.filter((pt) => pt.postId === post.id);
-        
+
         const tags = postTags.map((pt) => {
           const tag = allTags.find((t) => t.id === pt.tagId);
           return tag ? tag.name : null;
@@ -104,7 +104,7 @@ function Home() {
                 <QuestionCard
                   id={post.id}
                   key={post.id}
-                  image={post.image ? `${DOMAIN}${post.image}` : placeholder}
+                  image={post.image ? `${DOMAIN}${post.image}` : null}
                   title={post.title}
                   description={post.description}
                   author={post.author?.email}
