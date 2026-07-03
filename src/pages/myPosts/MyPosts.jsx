@@ -6,49 +6,159 @@ import SidebarButton from "../../components/sidebarButton/SidebarButton";
 
 import placeholder from "../../assets/placeholder.jpg";
 
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+
+const API_HEADERS = {
+  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+};
+
+const BASE_URL = "https://novi-backend-api-wgsgz.ondigitalocean.app/api";
+
+const DOMAIN = "https://novi-backend-api-wgsgz.ondigitalocean.app";
+
 function MyPosts() {
+  const [ownPosts, setOwnPosts] = useState(null);
+  const [error, setError] = useState(null);
+  const [enrichedPosts, setEnrichedPosts] = useState(null);
+  const [actualUserId, setActualUserId] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const decodedToken = jwtDecode(token);
+    const userId = decodedToken.userId;
+    setActualUserId(userId);
+
+    console.log(`Opgehaalde userId uit token: ${userId}`);
+    getMyPosts(userId);
+  }, []);
+
+  useEffect(() => {
+    if (ownPosts) {
+      mergeDataPosts({ posts: ownPosts.data });
+      console.log("Merged data in useEffect:", ownPosts);
+    }
+  }, [ownPosts]);
+
   async function getMyPosts(userId) {
     try {
-      const loginPost = await axios.post(
-        `https://novi-backend-api-wgsgz.ondigitalocean.app/api/users/${userId}/posts`,
-        {
-          headers: API_HEADERS,
-        },
-      );
-      setResult(loginPost.data);
-      console.log(loginPost.data.token);
-      login(e, mail, loginPost.data.token);
+      const userPosts = await axios.get(`${BASE_URL}/users/${userId}/posts`, {
+        headers: API_HEADERS,
+      });
+      console.log(`Posts van de gebruiker met ID ${userId}:`, userPosts.data);
+      setOwnPosts(userPosts);
     } catch (error) {
       console.error(error);
+      setError("Er is een fout opgetreden bij het ophalen van je posts.");
     }
 
     console.log(
-      `Gebruiker is ingelogd! Emailadres: ${mail}, Wachtwoord: ${password}`,
+      `Posts van de gebruiker met ID ${userId} zijn opgehaald: ${ownPosts}`,
     );
+  }
+
+  async function mergeDataPosts({ posts }) {
+    try {
+      const commentsResponse = await axios.get(`${BASE_URL}/comments`, {
+        headers: API_HEADERS,
+      });
+      const tagsPostResponse = await axios.get(`${BASE_URL}/postTags`, {
+        headers: API_HEADERS,
+      });
+      const tagsResponse = await axios.get(`${BASE_URL}/tags`, {
+        headers: API_HEADERS,
+      });
+      const postImagesResponse = await axios.get(`${BASE_URL}/postImages`, {
+        headers: API_HEADERS,
+      });
+
+      const allPosts = posts;
+      const comments = commentsResponse.data;
+      const allPostTags = tagsPostResponse.data;
+      const allTags = tagsResponse.data;
+      const postImages = postImagesResponse.data;
+
+      console.log("Alle posts:", allPosts);
+
+      const merged = [];
+
+      for (let i = 0; i < allPosts.length; i++) {
+        const post = allPosts[i];
+
+        const author =
+          actualUserId === post.authorId ? { id: actualUserId } : null;
+        const postComments = comments.filter(
+          (comment) => comment.postId === post.id,
+        );
+
+        const postTags = allPostTags.filter((pt) => pt.postId === post.id);
+        const tags = postTags.map((pt) => {
+          const tag = allTags.find((t) => t.id === pt.tagId);
+          return tag ? tag.name : null;
+        });
+
+        const coverImage = postImages.find(
+          (pi) => Number(pi.postId) === post.id,
+        );
+
+        merged.push({
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          likes: post.likes,
+          image: coverImage ? coverImage.image : null,
+          dateCreated: post.dateCreated,
+          author: author,
+          comments: postComments,
+          tags: tags,
+        });
+      }
+
+      setEnrichedPosts(merged);
+      console.log("Merged data:", merged);
+    } catch (error) {
+      console.error("Er ging iets mis bij het ophalen van de data:", error);
+      setError("Er ging iets mis bij het ophalen van de data.");
+    }
   }
 
   return (
     <>
       <div className="container">
         <section className="my-posts-header">
-          <h1 className="my-posts-title">Mijn posts (2)</h1>
+          <h1 className="my-posts-title">
+            Mijn posts ({enrichedPosts ? enrichedPosts.length : 0})
+          </h1>
           <div>
             <SidebarButton buttonStyle="post" size="small" />
           </div>
         </section>
-        <section className="my-posts-results mt-3">
-          <QuestionCard
-            image={placeholder}
-            title="Carburateur afstellen of vervangen?"
-            description="Mijn motor draait onregelmatig stationair en valt soms uit. Denk dat het aan de carburateur ligt. Is het de moeite om die nog af te stellen of beter meteen vervangen?"
-            author="John Doe"
-            authorImage={placeholder}
-            date="1 uur geleden"
-            tags={["carburateur", "restauratie"]}
-            likes={10}
-            comments={5}
-            type="mypost"
-          />
+        <section className="my-posts-results mt-3 ">
+          {enrichedPosts && enrichedPosts.length > 0 ? (
+            (console.log("Enriched posts data:", enrichedPosts),
+            enrichedPosts.map((post) => (
+              <QuestionCard
+                key={post.id}
+                image={post.image ? `${DOMAIN}${post.image}` : placeholder}
+                title={post.title}
+                description={post.description}
+                date={new Date(post.dateCreated).toLocaleDateString("nl-NL", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+                likes={post.likes}
+                comments={post.comments.length}
+                tags={post.tags}
+                type="mypost"
+                id={post.id}
+              />
+            )))
+          ) : (
+            <p>Posts zijn aan het laden...</p>
+          )}
+          {error && <p className="error-message">{error}</p>}
         </section>
       </div>
     </>

@@ -37,12 +37,16 @@ function Home() {
       const tagsResponse = await axios.get(`${BASE_URL}/tags`, {
         headers: API_HEADERS,
       });
+      const postImagesResponse = await axios.get(`${BASE_URL}/postImages`, {
+        headers: API_HEADERS,
+      });
 
       const posts = postsResponse.data;
       const users = usersResponse.data;
       const comments = commentsResponse.data;
       const allPostTags = tagsPostResponse.data;
       const allTags = tagsResponse.data;
+      const postImages = postImagesResponse.data;
 
       const merged = [];
 
@@ -55,23 +59,30 @@ function Home() {
         );
 
         const postTags = allPostTags.filter((pt) => pt.postId === post.id);
+        
         const tags = postTags.map((pt) => {
           const tag = allTags.find((t) => t.id === pt.tagId);
           return tag ? tag.name : null;
         });
+
+        const coverImage = postImages.find(
+          (pi) => Number(pi.postId) === post.id,
+        );
 
         merged.push({
           id: post.id,
           title: post.title,
           description: post.description,
           likes: post.likes,
-          image: post.image,
+          image: coverImage ? coverImage.image : null,
           dateCreated: post.dateCreated,
           author: author,
           comments: postComments,
           tags: tags,
         });
       }
+
+      merged.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
 
       setEnrichedPosts(merged);
       console.log("Merged data:", merged);

@@ -4,30 +4,110 @@ import Select from "react-select";
 
 import Sidebar from "../../components/sidebar/Sidebar";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Input from "../../components/input/Input";
 import Button from "../../components/button/Button";
 
-import placeholder from "../../assets/placeholder.jpg";
+import { useNavigate } from "react-router-dom";
+
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+
+const API_HEADERS = {
+  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+};
+const BASE_URL = "https://novi-backend-api-wgsgz.ondigitalocean.app/api";
 
 function NewPost() {
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+  const [actualUserId, setActualUserId] = useState(null);
+  const [imageError, setImageError] = useState(null);
+  const [titleError, setTitleError] = useState(null);
+  const [descriptionError, setDescriptionError] = useState(null);
+  const [tagsError, setTagsError] = useState(null);
+
+  const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+  const MAX_IMAGES = 5;
+  const TITLE_MIN = 5;
+  const TITLE_MAX = 200;
+  const DESCRIPTION_MIN = 10;
+  const DESCRIPTION_MAX = 5000;
+  const TAGS_MAX = 2;
+
+  function validateForm() {
+    let isValid = true;
+
+    if (title.trim().length < TITLE_MIN || title.trim().length > TITLE_MAX) {
+      setTitleError(
+        `Titel moet tussen ${TITLE_MIN} en ${TITLE_MAX} karakters lang zijn.`,
+      );
+      isValid = false;
+    } else {
+      setTitleError(null);
+    }
+
+    if (
+      description.trim().length < DESCRIPTION_MIN ||
+      description.trim().length > DESCRIPTION_MAX
+    ) {
+      setDescriptionError(
+        `Beschrijving moet tussen ${DESCRIPTION_MIN} en ${DESCRIPTION_MAX} karakters lang zijn.`,
+      );
+      isValid = false;
+    } else {
+      setDescriptionError(null);
+    }
+
+    if (selectedTags.length > TAGS_MAX) {
+      setTagsError(`Je kan maximum ${TAGS_MAX} tags selecteren.`);
+      isValid = false;
+    } else if (selectedTags.length === 0) {
+      setTagsError(`Selecteer minstens 1 tag.`);
+      isValid = false;
+    } else {
+      setTagsError(null);
+    }
+
+    return isValid;
+  }
 
   function handleFileChange(e) {
     const files = Array.from(e.target.files);
-    setSelectedFiles((prev) => [...prev, ...files]);
-    const urls = files.map((file) => URL.createObjectURL(file));
+
+    const validSizeFiles = files.filter((file) => file.size <= MAX_IMAGE_SIZE);
+    const tooLargeFiles = files.filter((file) => file.size > MAX_IMAGE_SIZE);
+
+    const remainingSlots = MAX_IMAGES - selectedImages.length;
+    const validFiles = validSizeFiles.slice(0, remainingSlots);
+    const excessFiles = validSizeFiles.slice(remainingSlots);
+
+    const errors = [];
+    if (tooLargeFiles.length > 0) {
+      errors.push(
+        `Deze afbeelding(en) zijn groter dan 2MB en werden niet toegevoegd: ${tooLargeFiles.map((file) => file.name).join(", ")}`,
+      );
+    }
+    if (excessFiles.length > 0) {
+      errors.push(`Je kan maximum ${MAX_IMAGES} afbeeldingen toevoegen.`);
+    }
+    setImageError(errors.length > 0 ? errors.join(" ") : null);
+
+    setSelectedImages((prev) => [...prev, ...validFiles]);
+    const urls = validFiles.map((file) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...urls]);
     e.target.value = "";
   }
 
   function handleRemove(index) {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   }
 
@@ -79,14 +159,82 @@ function NewPost() {
     }),
   };
 
-  const options = [
-    { value: "motor", label: "Motor" },
-    { value: "carburateur", label: "Carburateur" },
-    { value: "restauratie", label: "Restauratie" },
-    { value: "elektrisch", label: "Elektrisch" },
-    { value: "interieur", label: "Interieur" },
-    { value: "onderhoud", label: "Onderhoud" },
-  ];
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    console.log("Token bij useEffect:", token);
+    const decodedToken = jwtDecode(token);
+    const userId = decodedToken.userId;
+    setActualUserId(userId);
+    fetchTags();
+
+    console.log(`Opgehaalde userId uit token: ${userId}`);
+  }, []);
+
+  async function fetchTags() {
+    try {
+      const response = await axios.get(`${BASE_URL}/tags`, {
+        headers: API_HEADERS,
+      });
+      console.log("Fetched tags:", response.data);
+      setAllTags(response.data);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
+  }
+  const options = allTags.map((tag) => ({
+    value: tag.id,
+    label: tag.name,
+  }));
+
+  async function submitNewPost(e) {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    console.log("Token bij submitNewPost:", token);
+
+    try {
+      const postPayload = {
+        title: title,
+        description: description,
+        likes: 0,
+        authorId: actualUserId,
+        dateCreated: new Date().toISOString(),
+      };
+
+      const newPost = await axios.post(`${BASE_URL}/posts`, postPayload, {
+        headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+      });
+      for (let i = 0; i < selectedTags.length; i++) {
+        const tag = selectedTags[i];
+        await axios.post(
+          `${BASE_URL}/postTags`,
+          {
+            postId: newPost.data.id,
+            tagId: tag.value,
+          },
+          { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
+        );
+      }
+
+      for (let i = 0; i < selectedImages.length; i++) {
+        const image = selectedImages[i];
+        const formData = new FormData();
+        formData.append("postId", newPost.data.id);
+        formData.append("image", image);
+        await axios.post(`${BASE_URL}/postImages`, formData, {
+          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+        });
+      }
+
+      navigate(`/posts/${newPost.data.id}`);
+    } catch (error) {
+      console.error("Error submitting new post:", error);
+    }
+  }
 
   return (
     <>
@@ -99,7 +247,7 @@ function NewPost() {
               </div>
             </section>
             <section className="new-post__main">
-              <form className="new-post__form">
+              <form className="new-post__form" onSubmit={submitNewPost}>
                 <Input
                   label="Titel"
                   type="text"
@@ -109,6 +257,7 @@ function NewPost() {
                   setValue={setTitle}
                   style="text"
                   placeholder="Titel van je post"
+                  error={titleError}
                 />
                 <Input
                   label="Beschrijving"
@@ -119,6 +268,7 @@ function NewPost() {
                   setValue={setDescription}
                   style="textarea"
                   placeholder="Vertel meer over je post..."
+                  error={descriptionError}
                 />
                 <div>
                   <label className="mb-1" htmlFor="tags">
@@ -135,8 +285,11 @@ function NewPost() {
                     styles={selectStyles}
                   />
                   <span className="new-post__tag-info">
-                    Voeg relevante tags toe aan je post
+                    Voeg relevante tags toe aan je post <br></br>
                   </span>
+                  {tagsError && (
+                    <span className="input-error-message">{tagsError}</span>
+                  )}
                 </div>
                 <div className="new-post__file-input">
                   <label>Afbeelding</label>
@@ -147,6 +300,7 @@ function NewPost() {
                       name="image"
                       accept="image/*"
                       multiple
+                      disabled={selectedImages.length >= MAX_IMAGES}
                       onChange={handleFileChange}
                       className="new-post__file-input-field"
                     />
@@ -183,9 +337,12 @@ function NewPost() {
                         Klik om een afbeelding toe te voegen
                       </p>
                       <p className="new-post__upload-subtext">
-                        JPG, PNG of WEBP, max 5MB
+                        JPG, PNG of WEBP, max 2MB
                       </p>
                     </label>
+                    {imageError && (
+                      <p className="new-post__upload-error">{imageError}</p>
+                    )}
                     {previewUrls.length > 0 && (
                       <div className="new-post__preview-grid">
                         {previewUrls.map((url, index) => (

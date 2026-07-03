@@ -6,6 +6,10 @@ import axios from "axios";
 
 export const AuthContext = createContext(null);
 
+const API_HEADERS = {
+  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+};
+
 export default function AuthContextProvider({ children }) {
   const [auth, setAuth] = useState({
     isAuth: false,
@@ -50,6 +54,7 @@ export default function AuthContextProvider({ children }) {
         `https://novi-backend-api-wgsgz.ondigitalocean.app/api/users/${id}`,
         {
           headers: {
+            ...API_HEADERS,
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },

@@ -2,13 +2,20 @@ import "./Navbar.css";
 import Logo from "../../assets/logo.svg";
 import Add from "../../assets/add.svg";
 import Account from "../../assets/account.svg";
+import AccountDark from "../../assets/accountdark.svg";
 import { useState } from "react";
 import Input from "../input/Input";
 
 import { Link } from "react-router-dom";
 
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext.jsx";
+
 function Navbar() {
   const [search, setSearch] = useState("");
+
+  const { logout } = useContext(AuthContext);
+  const { isAuth } = useContext(AuthContext);
 
   function clickAccount() {
     const overlay = document.querySelector(".nav-account__overlay");
@@ -36,19 +43,31 @@ function Navbar() {
               <img src={Add} alt="Add item" className="nav-add" />
             </Link>
             <div className="nav-account__overlay-container">
-              <img
-                src={Account}
-                alt="Account"
-                className="nav-account"
-                onClick={clickAccount}
-              />
+              {isAuth ? (
+                <div className="nav-account-bg">
+                  <img
+                    src={AccountDark}
+                    alt="Account"
+                    className="nav-account"
+                    onClick={clickAccount}
+                  />
+                </div>
+              ) : (
+                <img
+                  src={Account}
+                  alt="Account"
+                  className="nav-account"
+                  onClick={clickAccount}
+                />
+              )}
+
               <div className="nav-account__overlay">
                 <Link to="/mijn-posts" className="nav-account__overlay-item">
                   Mijn posts
                 </Link>
-                <Link to="/uitloggen" className="nav-account__overlay-item">
+                <span className="nav-account__overlay-item" onClick={logout}>
                   Uitloggen
-                </Link>
+                </span>
               </div>
             </div>
           </div>

@@ -5,7 +5,17 @@ import Button from "../../components/button/Button";
 
 import "./Input.css";
 
-function Input({ value, setValue, type, id, name, label, style, placeholder }) {
+function Input({
+  value,
+  setValue,
+  type,
+  id,
+  name,
+  label,
+  style,
+  placeholder,
+  error,
+}) {
   if (label === undefined) {
     if (id === "search") {
       return (
@@ -26,8 +36,8 @@ function Input({ value, setValue, type, id, name, label, style, placeholder }) {
       );
     } else if (id === "reactie") {
       return (
-        <>
-          <input
+        <div className="textarea-wrapper">
+          <textarea
             type={type}
             id={id}
             name={name}
@@ -35,13 +45,14 @@ function Input({ value, setValue, type, id, name, label, style, placeholder }) {
             onChange={(e) => setValue(e.target.value)}
             className={style}
             placeholder={placeholder}
+            rows="1"
           />
           <Button
             type="submit"
             style="primary onInput"
             value="Plaatsen"
           ></Button>
-        </>
+        </div>
       );
     } else {
       return (
@@ -72,6 +83,7 @@ function Input({ value, setValue, type, id, name, label, style, placeholder }) {
             className={style}
             rows="4"
           />
+          {error && <span className="input-error-message">{error}</span>}
         </div>
       </>
     );
@@ -89,6 +101,7 @@ function Input({ value, setValue, type, id, name, label, style, placeholder }) {
             placeholder={placeholder}
             className={style}
           />
+          {error && <span className="input-error-message">{error}</span>}
         </div>
       </>
     );

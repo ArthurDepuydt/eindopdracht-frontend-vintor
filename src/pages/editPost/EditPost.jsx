@@ -4,19 +4,256 @@ import Select from "react-select";
 
 import Sidebar from "../../components/sidebar/Sidebar";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 import Input from "../../components/input/Input";
 import Button from "../../components/button/Button";
 
-import placeholder from "../../assets/placeholder.jpg";
+import { useParams, useNavigate } from "react-router-dom";
+
+const API_HEADERS = {
+  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+};
+const BASE_URL = "https://novi-backend-api-wgsgz.ondigitalocean.app/api";
+const DOMAIN = "https://novi-backend-api-wgsgz.ondigitalocean.app";
 
 function EditPost() {
+  const { id } = useParams();
+
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+  const [actualUserId, setActualUserId] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [errors, setError] = useState(null);
+  const [imageError, setImageError] = useState(null);
+  const [titleError, setTitleError] = useState(null);
+  const [descriptionError, setDescriptionError] = useState(null);
+  const [tagsError, setTagsError] = useState(null);
+
+  const [existingPostTags, setExistingPostTags] = useState([]);
+  const [existingPostImages, setExistingPostImages] = useState([]);
+
+  const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+  const MAX_IMAGES = 5;
+  const TITLE_MIN = 5;
+  const TITLE_MAX = 200;
+  const DESCRIPTION_MIN = 10;
+  const DESCRIPTION_MAX = 5000;
+  const TAGS_MAX = 2;
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const decodedToken = jwtDecode(token);
+    const userId = decodedToken.userId;
+    setActualUserId(userId);
+
+    async function initTagsAndPost() {
+      const fetchedTags = await fetchTags();
+      const fetchedImages = await fetchAllImages();
+      fetchCurrentPost(fetchedTags, fetchedImages);
+    }
+    initTagsAndPost();
+  }, []);
+
+  function validateForm() {
+    let isValid = true;
+
+    if (title.trim().length < TITLE_MIN || title.trim().length > TITLE_MAX) {
+      setTitleError(
+        `Titel moet tussen ${TITLE_MIN} en ${TITLE_MAX} karakters lang zijn.`,
+      );
+      isValid = false;
+    } else {
+      setTitleError(null);
+    }
+
+    if (
+      description.trim().length < DESCRIPTION_MIN ||
+      description.trim().length > DESCRIPTION_MAX
+    ) {
+      setDescriptionError(
+        `Beschrijving moet tussen ${DESCRIPTION_MIN} en ${DESCRIPTION_MAX} karakters lang zijn.`,
+      );
+      isValid = false;
+    } else {
+      setDescriptionError(null);
+    }
+
+    if (selectedTags.length > TAGS_MAX) {
+      setTagsError(`Je kan maximum ${TAGS_MAX} tags selecteren.`);
+      isValid = false;
+    } else if (selectedTags.length === 0) {
+      setTagsError(`Selecteer minstens 1 tag.`);
+      isValid = false;
+    } else {
+      setTagsError(null);
+    }
+
+    return isValid;
+  }
+
+  async function fetchCurrentPost(fetchedTags, fetchedImages) {
+    try {
+      const currentPostResponse = await axios.get(`${BASE_URL}/posts/${id}`, {
+        headers: API_HEADERS,
+      });
+      const tagsResponse = await axios.get(`${BASE_URL}/postTags`, {
+        headers: API_HEADERS,
+      });
+      const tagsData = tagsResponse.data;
+      const postTagsCurrent = tagsData.filter(
+        (tag) => tag.postId === parseInt(id),
+      );
+
+      const tags = postTagsCurrent.map((pt) => {
+        const tag = fetchedTags.find((t) => t.id === pt.tagId);
+        return { value: tag.id, label: tag.name };
+      });
+
+      const postImages = fetchedImages.filter(
+        (img) => img.postId === parseInt(id),
+      );
+
+      setTitle(currentPostResponse.data.title);
+      setDescription(currentPostResponse.data.description);
+      setSelectedTags(tags);
+      setSelectedFiles(postImages);
+      setPreviewUrls(postImages.map((img) => `${DOMAIN}${img.image}`));
+      setExistingPostImages(postImages);
+      setExistingPostTags(postTagsCurrent);
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      setError("Er is een fout opgetreden bij het ophalen van de post.");
+    }
+  }
+
+  async function fetchTags() {
+    try {
+      const response = await axios.get(`${BASE_URL}/tags`, {
+        headers: API_HEADERS,
+      });
+      setAllTags(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+      return [];
+    }
+  }
+
+  async function fetchAllImages() {
+    try {
+      const response = await axios.get(`${BASE_URL}/postImages`, {
+        headers: API_HEADERS,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      return [];
+    }
+  }
+
+  async function submitEdit(e) {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    console.log("Token bij editNewPost:", token);
+
+    try {
+      const postPayload = {
+        title: title,
+        description: description,
+        likes: 0,
+        authorId: actualUserId,
+        dateCreated: new Date().toISOString(),
+        id: parseInt(id),
+      };
+
+      const editedPost = await axios.put(
+        `${BASE_URL}/posts/${id}`,
+        postPayload,
+        {
+          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+        },
+      );
+
+      const currentTagIds = selectedTags.map((tag) => tag.value);
+      const originalTagIds = existingPostTags.map((postTag) => postTag.tagId);
+
+      const tagsToAdd = selectedTags.filter(
+        (tag) => !originalTagIds.includes(tag.value),
+      );
+      const tagsToRemove = existingPostTags.filter(
+        (postTag) => !currentTagIds.includes(postTag.tagId),
+      );
+
+      for (const tag of tagsToAdd) {
+        await axios.post(
+          `${BASE_URL}/postTags`,
+          { postId: editedPost.data.id, tagId: tag.value },
+          { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
+        );
+      }
+
+      for (const postTag of tagsToRemove) {
+        await axios.delete(`${BASE_URL}/postTags/${postTag.id}`, {
+          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+        });
+      }
+
+      const remainingExistingIds = selectedFiles
+        .filter((item) => item.id)
+        .map((item) => item.id);
+
+      const imagesToRemove = existingPostImages.filter(
+        (img) => !remainingExistingIds.includes(img.id),
+      );
+
+      const newFiles = selectedFiles.filter((item) => item instanceof File);
+
+      for (const file of newFiles) {
+        const formData = new FormData();
+        formData.append("postId", editedPost.data.id);
+        formData.append("image", file);
+        await axios.post(`${BASE_URL}/postImages`, formData, {
+          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+        });
+      }
+
+      for (const img of imagesToRemove) {
+        try {
+          await axios.delete(`${BASE_URL}/postImages/${img.id}`, {
+            headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+          });
+        } catch (deleteError) {
+          console.error(
+            "Kon afbeelding niet verwijderen (vereist admin-rechten):",
+            deleteError,
+          );
+        }
+      }
+
+      navigate(`/posts/${editedPost.data.id}`);
+    } catch (error) {
+      console.error("Error submitting edited post:", error);
+    }
+  }
+
+  const options = allTags.map((tag) => ({
+    value: tag.id,
+    label: tag.name,
+  }));
 
   function handleFileChange(e) {
     const files = Array.from(e.target.files);
@@ -79,15 +316,6 @@ function EditPost() {
     }),
   };
 
-  const options = [
-    { value: "motor", label: "Motor" },
-    { value: "carburateur", label: "Carburateur" },
-    { value: "restauratie", label: "Restauratie" },
-    { value: "elektrisch", label: "Elektrisch" },
-    { value: "interieur", label: "Interieur" },
-    { value: "onderhoud", label: "Onderhoud" },
-  ];
-
   return (
     <>
       <div className="container">
@@ -99,7 +327,7 @@ function EditPost() {
               </div>
             </section>
             <section className="new-post__main">
-              <form className="new-post__form">
+              <form className="new-post__form" onSubmit={submitEdit}>
                 <Input
                   label="Titel"
                   type="text"
@@ -135,7 +363,7 @@ function EditPost() {
                     styles={selectStyles}
                   />
                   <span className="new-post__tag-info">
-                    Voeg relevante tags toe aan je post
+                    Voeg relevante tags toe aan je post<br></br>
                   </span>
                 </div>
                 <div className="new-post__file-input">
@@ -217,6 +445,7 @@ function EditPost() {
                   ></Button>
                 </div>
               </form>
+              {errors && <p className="error-message">{errors}</p>}
             </section>
           </section>
           <section className="sidebar-section">

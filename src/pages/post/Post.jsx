@@ -89,9 +89,9 @@ function Post() {
         return tag ? tag.name : null;
       });
       const postImageAssembled = postImages
-        .filter((pi) => pi.postId === post.id)
+        .filter((pi) => Number(pi.postId) === post.id)
         .map((pi) => pi.image);
-      const allImages = [post.image, ...postImageAssembled];
+      const allImages = postImageAssembled;
 
       setEnrichedPost({
         id: post.id,
@@ -109,11 +109,54 @@ function Post() {
       setError("Er ging iets mis bij het ophalen van de data.");
     }
   }
-  
+
+  async function createComment(e) {
+    e.preventDefault();
+    try {
+      const postPayload = {
+        title: title,
+        description: description,
+        likes: 0,
+        authorId: actualUserId,
+        dateCreated: new Date().toISOString(),
+      };
+
+      const newPost = await axios.post(`${BASE_URL}/posts`, postPayload, {
+        headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+      });
+      for (let i = 0; i < selectedTags.length; i++) {
+        const tag = selectedTags[i];
+        await axios.post(
+          `${BASE_URL}/postTags`,
+          {
+            postId: newPost.data.id,
+            tagId: tag.value,
+          },
+          { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
+        );
+      }
+
+      for (let i = 0; i < selectedImages.length; i++) {
+        const image = selectedImages[i];
+        const formData = new FormData();
+        formData.append("postId", newPost.data.id);
+        formData.append("image", image);
+        await axios.post(`${BASE_URL}/postImages`, formData, {
+          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
+        });
+      }
+
+      navigate(`/posts/${newPost.data.id}`);
+    } catch (error) {
+      console.error("Error submitting new post:", error);
+    }
+  }
 
   const username = enrichedPost?.author
     ? enrichedPost.author.email.split("@")[0]
     : "Onbekend";
+
+  const noImageAvailable = enrichedPost?.images.length === 0;
 
   return (
     <>
@@ -125,25 +168,33 @@ function Post() {
             ) : enrichedPost ? (
               <div>
                 <section className="post-detail__header">
-                  <Swiper
-                    modules={[Navigation, Pagination]}
-                    spaceBetween={50}
-                    slidesPerView={1}
-                    navigation
-                    pagination={{ clickable: true }}
-                    className="post-detail__swiper"
+                  {enrichedPost.images.length > 0 && (
+                    <Swiper
+                      modules={[Navigation, Pagination]}
+                      spaceBetween={50}
+                      slidesPerView={1}
+                      navigation
+                      pagination={{ clickable: true }}
+                      className="post-detail__swiper"
+                    >
+                      {enrichedPost.images.map((image, index) => {
+                        console.log("Image URL:", image);
+                        return (
+                          <SwiperSlide key={index}>
+                            <img
+                              src={image ? `${DOMAIN}${image}` : placeholder}
+                              className="post-detail__swiper-image"
+                              alt="Placeholder"
+                            />
+                          </SwiperSlide>
+                        );
+                      })}
+                    </Swiper>
+                  )}
+
+                  <div
+                    className={`post-detail__content ${noImageAvailable ? "full-width" : ""}`}
                   >
-                    {enrichedPost.images.map((image, index) => (
-                      <SwiperSlide key={index}>
-                        <img
-                          src={image ? `${DOMAIN}${image}` : placeholder}
-                          className="post-detail__swiper-image"
-                          alt="Placeholder"
-                        />
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-                  <div className="post-detail__content">
                     <h1 className="post-detail__title">{enrichedPost.title}</h1>
 
                     <div className="post-detail__author-container">
@@ -227,15 +278,20 @@ function Post() {
                   ))}
 
                   <hr className="post-detail__divider mt-5 mb-5" />
-                  <Input
-                    type="reactie"
-                    id="reactie"
-                    name="reactie"
-                    value={reactie}
-                    setValue={setReactie}
-                    style="text onInput"
-                    placeholder="Schrijf een reactie"
-                  />
+                  <form
+                    onSubmit={createComment}
+                    className="post-detail__comment-form"
+                  >
+                    <Input
+                      type="reactie"
+                      id="reactie"
+                      name="reactie"
+                      value={reactie}
+                      setValue={setReactie}
+                      style="text onInput comment-input"
+                      placeholder="Schrijf een reactie"
+                    />
+                  </form>
                 </section>
               </div>
             ) : (
