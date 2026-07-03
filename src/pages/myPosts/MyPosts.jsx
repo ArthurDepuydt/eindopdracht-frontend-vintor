@@ -6,6 +6,7 @@ import SidebarButton from "../../components/sidebarButton/SidebarButton";
 
 import placeholder from "../../assets/placeholder.jpg";
 
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";

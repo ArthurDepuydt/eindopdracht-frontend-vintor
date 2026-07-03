@@ -20,14 +20,17 @@ function QuestionCard({
   type,
   id,
 }) {
+  console.log(image);
   const username = author ? author.split("@")[0] : "Onbekend";
   if (type === "mypost") {
     return (
       <>
         <article className="question-card">
-          <div className="question-card__image-container">
-            <img src={image} alt={title} className="question-card__image" />
-          </div>
+          {image && (
+            <div className="question-card__image-container">
+              <img src={image} alt={title} className="question-card__image" />
+            </div>
+          )}
           <div className="question-card__content">
             <h2 className="question-card__title my-posts">{title}</h2>
             <p className="question-card__description my-posts">{description}</p>
