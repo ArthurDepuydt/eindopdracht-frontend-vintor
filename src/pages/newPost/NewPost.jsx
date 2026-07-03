@@ -193,8 +193,6 @@ function NewPost() {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    console.log("Token bij submitNewPost:", token);
 
     try {
       const postPayload = {
