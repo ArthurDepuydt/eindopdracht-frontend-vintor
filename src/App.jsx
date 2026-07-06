@@ -29,7 +29,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registreren" element={<Register />} />
-          <Route path="/zoeken/:id" element={<Searchpage />} />
+          <Route path="/zoeken/:query" element={<Searchpage />} />
           <Route path="/posts/:id" element={<Post />} />
           <Route
             path="/mijn-posts"
