@@ -7,10 +7,10 @@ import usericon from "../../assets/usericon.svg";
 import axios from "axios";
 
 const API_HEADERS = {
-  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
 };
-const BASE_URL = "https://novi-backend-api-wgsgz.ondigitalocean.app/api";
-const DOMAIN = "https://novi-backend-api-wgsgz.ondigitalocean.app";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const DOMAIN = import.meta.env.VITE_API_DOMAIN;
 
 function Home() {
   const [enrichedPosts, setEnrichedPosts] = useState([]);
