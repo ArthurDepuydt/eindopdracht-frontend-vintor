@@ -6,12 +6,15 @@ import AccountDark from "../../assets/accountdark.svg";
 import { useState } from "react";
 import Input from "../input/Input";
 
+import { useNavigate } from "react-router-dom";
+
 import { Link } from "react-router-dom";
 
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext.jsx";
 
 function Navbar() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
   const { logout } = useContext(AuthContext);
@@ -22,6 +25,15 @@ function Navbar() {
     overlay.classList.toggle("active");
   }
 
+  function handleSearch(e) {
+    e.preventDefault();
+
+    const searchParam = search.trim();
+    console.log(searchParam);
+
+    navigate(`zoeken/${searchParam}`);
+  }
+
   return (
     <>
       <nav>
@@ -29,15 +41,17 @@ function Navbar() {
           <Link to="/">
             <img src={Logo} alt="Vintor logo" className="logo" />
           </Link>
-          <Input
-            type="text"
-            id="search"
-            name="search"
-            value={search}
-            setValue={setSearch}
-            style="light search"
-            placeholder="Post of tag zoeken"
-          />
+          <form onSubmit={handleSearch} className="nav-search">
+            <Input
+              type="text"
+              id="search"
+              name="search"
+              value={search}
+              setValue={setSearch}
+              style="light search"
+              placeholder="Post of tag zoeken"
+            />
+          </form>
           <div className="nav-icons">
             <Link to="/nieuwe-post" className="nav-add-link">
               <img src={Add} alt="Add item" className="nav-add" />
