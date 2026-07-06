@@ -34,7 +34,7 @@ function Searchpage() {
     const fuse = new Fuse(enrichedPosts, {
       keys: ["title", "description", "tags"],
       includeScore: true,
-      threshold: 0.5,
+      threshold: 0.3,
     });
 
     setFilteredPosts(fuse.search(query).map((result) => result.item));
