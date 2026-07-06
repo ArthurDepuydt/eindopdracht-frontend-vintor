@@ -7,7 +7,7 @@ import axios from "axios";
 export const AuthContext = createContext(null);
 
 const API_HEADERS = {
-  "novi-education-project-id": "0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601",
+  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
 };
 
 export default function AuthContextProvider({ children }) {
@@ -51,7 +51,7 @@ export default function AuthContextProvider({ children }) {
   async function getUser(id, token) {
     try {
       const actualUser = await axios.get(
-        `https://novi-backend-api-wgsgz.ondigitalocean.app/api/users/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/users/${id}`,
         {
           headers: {
             ...API_HEADERS,
