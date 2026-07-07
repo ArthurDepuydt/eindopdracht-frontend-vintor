@@ -8,13 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 import flairlogin from "../../assets/flairlogin.svg";
 
-import axios from "axios";
-
-const API_HEADERS = {
-  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
-};
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { registerUser } from "../../api/auth";
 
 function Register() {
   const [mail, setMail] = useState("");
@@ -24,6 +18,8 @@ function Register() {
   const [nameError, setNameError] = useState(null);
   const [mailError, setMailError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
+  const [registerError, setRegisterError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -70,28 +66,19 @@ function Register() {
       return;
     }
 
-    try {
-      const registerPost = await axios.post(
-        `${BASE_URL}/users`,
-        {
-          email: mail,
-          password: password,
-          username: name,
-        },
-        {
-          headers: API_HEADERS,
-        },
-      );
-      setResult(registerPost.data);
-      navigate("/login");
-      console.log(registerPost.data);
-    } catch (error) {
+    setSubmitting(true);
+    const [data, error] = await registerUser(mail, password, name);
+    if (error) {
       console.error(error);
+      setRegisterError(
+        "Registreren is niet gelukt. Probeer het later opnieuw.",
+      );
+      setSubmitting(false);
+      return;
     }
-
-    console.log(
-      `Gebruiker is geregistreerd! Gebruikersnaam: ${name}, Emailadres: ${mail}, Wachtwoord: ${password}`,
-    );
+    setRegisterError(null);
+    setResult(data);
+    navigate("/login");
   }
 
   return (
@@ -146,10 +133,14 @@ function Register() {
                 Ik ga akkoord met de privacyverklaring
               </label>
             </div>
+            {registerError && (
+              <p className="input-error-message">{registerError}</p>
+            )}
             <Button
-              value="Account aanmaken"
-              style="primary mt-1"
+              value={submitting ? "Bezig met registreren..." : "Account aanmaken"}
+              style="primary "
               type="submit"
+              disabled={submitting}
             />
           </form>
           <span>of</span>

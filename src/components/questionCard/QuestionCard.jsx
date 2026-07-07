@@ -5,6 +5,10 @@ import "./QuestionCard.css";
 import likesIcon from "../../assets/likes.svg";
 import commentsIcon from "../../assets/comments.svg";
 
+import { deletePost } from "../../api/posts";
+
+import { useState } from "react";
+
 import Button from "../../components/button/Button";
 
 function QuestionCard({
@@ -19,8 +23,10 @@ function QuestionCard({
   tags,
   type,
   id,
+  token,
+  onDelete,
 }) {
-  console.log(image);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const username = author ? author.split("@")[0] : "Onbekend";
   if (type === "mypost") {
     return (
@@ -57,11 +63,39 @@ function QuestionCard({
                   value="Bewerken"
                   link={`/post-aanpassen/${id}`}
                 ></Button>
-                <button className="question-card__options-button" type="button">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </button>
+                <div className="question-card__options-button__container">
+                  <button
+                    className="question-card__options-button"
+                    onClick={() => setDropdownOpen((prev) => !prev)}
+                    type="button"
+                  >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </button>
+                  <div
+                    className={`question-card__options-dropdown ${dropdownOpen ? "active" : ""}`}
+                  >
+                    <button
+                      className="question-card__options-dropdown-item"
+                      type="button"
+                      id={`delete-post-${id}`}
+                      onClick={async () => {
+                        if (
+                          !confirm(
+                            "Ben je zeker dat je deze post wilt verwijderen?",
+                          )
+                        )
+                          return;
+                        const [success, error] = await deletePost(id, token);
+                        if (success) onDelete?.(id);
+                        else alert("Verwijderen mislukt: " + error);
+                      }}
+                    >
+                      post verwijderen
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="question-card__tags-container my-posts">
                 <div className="question-card__tags">

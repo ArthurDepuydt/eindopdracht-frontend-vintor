@@ -6,7 +6,6 @@ import Sidebar from "../../components/sidebar/Sidebar";
 
 import { useState, useEffect } from "react";
 
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 import Input from "../../components/input/Input";
@@ -14,10 +13,18 @@ import Button from "../../components/button/Button";
 
 import { useParams, useNavigate } from "react-router-dom";
 
-const API_HEADERS = {
-  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
-};
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import {
+  fetchRawPost,
+  fetchAllPostTags,
+  fetchAllPostImages,
+  fetchTags,
+  updatePost,
+  addPostTag,
+  removePostTag,
+  uploadPostImage,
+  removePostImage,
+} from "../../api/posts";
+
 const DOMAIN = import.meta.env.VITE_API_DOMAIN;
 
 function EditPost() {
@@ -37,6 +44,9 @@ function EditPost() {
   const [titleError, setTitleError] = useState(null);
   const [descriptionError, setDescriptionError] = useState(null);
   const [tagsError, setTagsError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [existingPostTags, setExistingPostTags] = useState([]);
   const [existingPostImages, setExistingPostImages] = useState([]);
@@ -56,9 +66,9 @@ function EditPost() {
     setActualUserId(userId);
 
     async function initTagsAndPost() {
-      const fetchedTags = await fetchTags();
-      const fetchedImages = await fetchAllImages();
-      fetchCurrentPost(fetchedTags, fetchedImages);
+      const fetchedTags = await loadTags();
+      const fetchedImages = await loadAllImages();
+      loadCurrentPost(fetchedTags, fetchedImages);
     }
     initTagsAndPost();
   }, []);
@@ -100,64 +110,57 @@ function EditPost() {
     return isValid;
   }
 
-  async function fetchCurrentPost(fetchedTags, fetchedImages) {
-    try {
-      const currentPostResponse = await axios.get(`${BASE_URL}/posts/${id}`, {
-        headers: API_HEADERS,
-      });
-      const tagsResponse = await axios.get(`${BASE_URL}/postTags`, {
-        headers: API_HEADERS,
-      });
-      const tagsData = tagsResponse.data;
-      const postTagsCurrent = tagsData.filter(
-        (tag) => tag.postId === parseInt(id),
-      );
+  async function loadCurrentPost(fetchedTags, fetchedImages) {
+    const [post, postError] = await fetchRawPost(id);
+    const [allPostTags, tagsError] = await fetchAllPostTags();
 
-      const tags = postTagsCurrent.map((pt) => {
-        const tag = fetchedTags.find((t) => t.id === pt.tagId);
-        return { value: tag.id, label: tag.name };
-      });
-
-      const postImages = fetchedImages.filter(
-        (img) => img.postId === parseInt(id),
-      );
-
-      setTitle(currentPostResponse.data.title);
-      setDescription(currentPostResponse.data.description);
-      setSelectedTags(tags);
-      setSelectedFiles(postImages);
-      setPreviewUrls(postImages.map((img) => `${DOMAIN}${img.image}`));
-      setExistingPostImages(postImages);
-      setExistingPostTags(postTagsCurrent);
-    } catch (error) {
-      console.error("Error fetching post:", error);
+    if (postError || tagsError) {
+      console.error(postError || tagsError);
       setError("Er is een fout opgetreden bij het ophalen van de post.");
+      setLoading(false);
+      return;
     }
+
+    const postTagsCurrent = allPostTags.filter(
+      (tag) => tag.postId === parseInt(id),
+    );
+
+    const tags = postTagsCurrent.map((pt) => {
+      const tag = fetchedTags.find((t) => t.id === pt.tagId);
+      return { value: tag.id, label: tag.name };
+    });
+
+    const postImages = fetchedImages.filter(
+      (img) => Number(img.postId) === parseInt(id),
+    );
+
+    setTitle(post.title);
+    setDescription(post.description);
+    setSelectedTags(tags);
+    setSelectedFiles(postImages);
+    setPreviewUrls(postImages.map((img) => `${DOMAIN}${img.image}`));
+    setExistingPostImages(postImages);
+    setExistingPostTags(postTagsCurrent);
+    setLoading(false);
   }
 
-  async function fetchTags() {
-    try {
-      const response = await axios.get(`${BASE_URL}/tags`, {
-        headers: API_HEADERS,
-      });
-      setAllTags(response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching tags:", error);
+  async function loadTags() {
+    const [tags, error] = await fetchTags();
+    if (error) {
+      console.error(error);
       return [];
     }
+    setAllTags(tags);
+    return tags;
   }
 
-  async function fetchAllImages() {
-    try {
-      const response = await axios.get(`${BASE_URL}/postImages`, {
-        headers: API_HEADERS,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching images:", error);
+  async function loadAllImages() {
+    const [images, error] = await fetchAllPostImages();
+    if (error) {
+      console.error(error);
       return [];
     }
+    return images;
   }
 
   async function submitEdit(e) {
@@ -168,86 +171,68 @@ function EditPost() {
     }
 
     const token = localStorage.getItem("token");
-    console.log("Token bij editNewPost:", token);
 
-    try {
-      const postPayload = {
-        title: title,
-        description: description,
-        likes: 0,
-        authorId: actualUserId,
-        dateCreated: new Date().toISOString(),
-        id: parseInt(id),
-      };
+    const postPayload = {
+      title: title,
+      description: description,
+      likes: 0,
+      authorId: actualUserId,
+      dateCreated: new Date().toISOString(),
+      id: parseInt(id),
+    };
 
-      const editedPost = await axios.put(
-        `${BASE_URL}/posts/${id}`,
-        postPayload,
-        {
-          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-        },
-      );
+    setSubmitting(true);
+    const [editedPost, editError] = await updatePost(id, postPayload, token);
+    if (editError) {
+      console.error(editError);
+      setSubmitError("Post bijwerken is mislukt. Probeer het opnieuw.");
+      setSubmitting(false);
+      return;
+    }
 
-      const currentTagIds = selectedTags.map((tag) => tag.value);
-      const originalTagIds = existingPostTags.map((postTag) => postTag.tagId);
+    const currentTagIds = selectedTags.map((tag) => tag.value);
+    const originalTagIds = existingPostTags.map((postTag) => postTag.tagId);
 
-      const tagsToAdd = selectedTags.filter(
-        (tag) => !originalTagIds.includes(tag.value),
-      );
-      const tagsToRemove = existingPostTags.filter(
-        (postTag) => !currentTagIds.includes(postTag.tagId),
-      );
+    const tagsToAdd = selectedTags.filter(
+      (tag) => !originalTagIds.includes(tag.value),
+    );
+    const tagsToRemove = existingPostTags.filter(
+      (postTag) => !currentTagIds.includes(postTag.tagId),
+    );
 
-      for (const tag of tagsToAdd) {
-        await axios.post(
-          `${BASE_URL}/postTags`,
-          { postId: editedPost.data.id, tagId: tag.value },
-          { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
+    for (const tag of tagsToAdd) {
+      await addPostTag(editedPost.id, tag.value, token);
+    }
+
+    for (const postTag of tagsToRemove) {
+      await removePostTag(postTag.id, token);
+    }
+
+    const remainingExistingIds = selectedFiles
+      .filter((item) => item.id)
+      .map((item) => item.id);
+
+    const imagesToRemove = existingPostImages.filter(
+      (img) => !remainingExistingIds.includes(img.id),
+    );
+
+    const newFiles = selectedFiles.filter((item) => item instanceof File);
+
+    for (const file of newFiles) {
+      await uploadPostImage(editedPost.id, file, token);
+    }
+
+    for (const img of imagesToRemove) {
+      const [, deleteError] = await removePostImage(img.id, token);
+      if (deleteError) {
+        console.error(
+          "Kon afbeelding niet verwijderen (vereist admin-rechten):",
+          deleteError,
         );
       }
-
-      for (const postTag of tagsToRemove) {
-        await axios.delete(`${BASE_URL}/postTags/${postTag.id}`, {
-          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-        });
-      }
-
-      const remainingExistingIds = selectedFiles
-        .filter((item) => item.id)
-        .map((item) => item.id);
-
-      const imagesToRemove = existingPostImages.filter(
-        (img) => !remainingExistingIds.includes(img.id),
-      );
-
-      const newFiles = selectedFiles.filter((item) => item instanceof File);
-
-      for (const file of newFiles) {
-        const formData = new FormData();
-        formData.append("postId", editedPost.data.id);
-        formData.append("image", file);
-        await axios.post(`${BASE_URL}/postImages`, formData, {
-          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-        });
-      }
-
-      for (const img of imagesToRemove) {
-        try {
-          await axios.delete(`${BASE_URL}/postImages/${img.id}`, {
-            headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-          });
-        } catch (deleteError) {
-          console.error(
-            "Kon afbeelding niet verwijderen (vereist admin-rechten):",
-            deleteError,
-          );
-        }
-      }
-
-      navigate(`/posts/${editedPost.data.id}`);
-    } catch (error) {
-      console.error("Error submitting edited post:", error);
     }
+
+    navigate(`/posts/${editedPost.id}`);
   }
 
   const options = allTags.map((tag) => ({
@@ -327,6 +312,9 @@ function EditPost() {
               </div>
             </section>
             <section className="new-post__main">
+              {loading ? (
+                <p>Post is aan het laden...</p>
+              ) : (
               <form className="new-post__form" onSubmit={submitEdit}>
                 <Input
                   label="Titel"
@@ -432,6 +420,9 @@ function EditPost() {
                     )}
                   </div>
                 </div>
+                {submitError && (
+                  <p className="error-message">{submitError}</p>
+                )}
                 <div className="new-post__buttons">
                   <Button
                     type="button"
@@ -440,11 +431,13 @@ function EditPost() {
                   ></Button>
                   <Button
                     type="submit"
-                    value="Opslaan"
+                    value={submitting ? "Bezig met opslaan..." : "Opslaan"}
                     style="primary wide"
+                    disabled={submitting}
                   ></Button>
                 </div>
               </form>
+              )}
               {errors && <p className="error-message">{errors}</p>}
             </section>
           </section>

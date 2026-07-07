@@ -197,6 +197,45 @@
   border-radius: 50%;
 }
 
+.question-card__options-button__container {
+  position: relative;
+}
+
+.question-card__options-dropdown {
+  position: absolute;
+  top: 0;
+  right: 105%;
+  background-color: white;
+  border: 1px solid rgba(var(--primary-rgb), 0.5);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.question-card__options-dropdown-item {
+  background-color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: none;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+}
+
+.question-card__options-dropdown-item:hover {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.question-card__options-dropdown.active {
+  display: flex;
+}
+
 .question-card__title.my-posts {
   max-width: 65% !important;
 }

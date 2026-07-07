@@ -15,6 +15,7 @@ function Input({
   style,
   placeholder,
   error,
+  disabled,
 }) {
   if (label === undefined) {
     if (id === "search") {
@@ -46,11 +47,13 @@ function Input({
             className={style}
             placeholder={placeholder}
             rows="1"
+            disabled={disabled}
           />
           <Button
             type="submit"
             style="primary onInput"
-            value="Plaatsen"
+            value={disabled ? "..." : "Plaatsen"}
+            disabled={disabled}
           ></Button>
         </div>
       );

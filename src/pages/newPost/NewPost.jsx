@@ -11,13 +11,14 @@ import Button from "../../components/button/Button";
 
 import { useNavigate } from "react-router-dom";
 
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
-const API_HEADERS = {
-  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
-};
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import {
+  createPost,
+  addPostTag,
+  uploadPostImage,
+  fetchTags,
+} from "../../api/posts";
 
 function NewPost() {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ function NewPost() {
   const [titleError, setTitleError] = useState(null);
   const [descriptionError, setDescriptionError] = useState(null);
   const [tagsError, setTagsError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
   const MAX_IMAGES = 5;
@@ -161,25 +164,19 @@ function NewPost() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("Token bij useEffect:", token);
     const decodedToken = jwtDecode(token);
     const userId = decodedToken.userId;
     setActualUserId(userId);
-    fetchTags();
-
-    console.log(`Opgehaalde userId uit token: ${userId}`);
+    loadTags();
   }, []);
 
-  async function fetchTags() {
-    try {
-      const response = await axios.get(`${BASE_URL}/tags`, {
-        headers: API_HEADERS,
-      });
-      console.log("Fetched tags:", response.data);
-      setAllTags(response.data);
-    } catch (error) {
-      console.error("Error fetching tags:", error);
+  async function loadTags() {
+    const [tags, error] = await fetchTags();
+    if (error) {
+      console.error(error);
+      return;
     }
+    setAllTags(tags);
   }
   const options = allTags.map((tag) => ({
     value: tag.id,
@@ -188,50 +185,38 @@ function NewPost() {
 
   async function submitNewPost(e) {
     e.preventDefault();
+    const token = localStorage.getItem("token");
 
     if (!validateForm()) {
       return;
     }
 
+    const postPayload = {
+      title: title,
+      description: description,
+      likes: 0,
+      authorId: actualUserId,
+      dateCreated: new Date().toISOString(),
+    };
 
-    try {
-      const postPayload = {
-        title: title,
-        description: description,
-        likes: 0,
-        authorId: actualUserId,
-        dateCreated: new Date().toISOString(),
-      };
-
-      const newPost = await axios.post(`${BASE_URL}/posts`, postPayload, {
-        headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-      });
-      for (let i = 0; i < selectedTags.length; i++) {
-        const tag = selectedTags[i];
-        await axios.post(
-          `${BASE_URL}/postTags`,
-          {
-            postId: newPost.data.id,
-            tagId: tag.value,
-          },
-          { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
-        );
-      }
-
-      for (let i = 0; i < selectedImages.length; i++) {
-        const image = selectedImages[i];
-        const formData = new FormData();
-        formData.append("postId", newPost.data.id);
-        formData.append("image", image);
-        await axios.post(`${BASE_URL}/postImages`, formData, {
-          headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-        });
-      }
-
-      navigate(`/posts/${newPost.data.id}`);
-    } catch (error) {
-      console.error("Error submitting new post:", error);
+    setSubmitting(true);
+    const [newPost, postError] = await createPost(postPayload, token);
+    if (postError) {
+      console.error(postError);
+      setSubmitError("Post aanmaken is mislukt. Probeer het opnieuw.");
+      setSubmitting(false);
+      return;
     }
+
+    for (const tag of selectedTags) {
+      await addPostTag(newPost.id, tag.value, token);
+    }
+
+    for (const image of selectedImages) {
+      await uploadPostImage(newPost.id, image, token);
+    }
+
+    navigate(`/posts/${newPost.id}`);
   }
 
   return (
@@ -359,6 +344,7 @@ function NewPost() {
                     )}
                   </div>
                 </div>
+                {submitError && <p className="error-message">{submitError}</p>}
                 <div className="new-post__buttons">
                   <Button
                     type="button"
@@ -367,8 +353,9 @@ function NewPost() {
                   ></Button>
                   <Button
                     type="submit"
-                    value="Plaatsen"
+                    value={submitting ? "Bezig met plaatsen..." : "Plaatsen"}
                     style="primary wide"
+                    disabled={submitting}
                   ></Button>
                 </div>
               </form>

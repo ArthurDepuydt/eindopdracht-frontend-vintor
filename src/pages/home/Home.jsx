@@ -4,19 +4,21 @@ import QuestionCard from "../../components/questionCard/QuestionCard";
 import Sidebar from "../../components/sidebar/Sidebar";
 import usericon from "../../assets/usericon.svg";
 
-import fetchPosts from "../../hooks/fetchPosts";
+import { fetchPosts } from "../../api/posts";
 
 const DOMAIN = import.meta.env.VITE_API_DOMAIN;
 
 function Home() {
   const [enrichedPosts, setEnrichedPosts] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function initialisation() {
       const [posts, fetchError] = await fetchPosts();
-      setEnrichedPosts(posts);
+      setEnrichedPosts(posts || []);
       setError(fetchError);
+      setLoading(false);
     }
     initialisation();
   }, []);
@@ -27,7 +29,9 @@ function Home() {
         <div className="home-wrapper">
           <section className="questions-section">
             {error ? (
-              <p>{error}</p>
+              <p className="error-message">{error}</p>
+            ) : loading ? (
+              <p>Posts zijn aan het laden...</p>
             ) : enrichedPosts.length > 0 ? (
               enrichedPosts.map((post) => (
                 <QuestionCard
@@ -49,7 +53,7 @@ function Home() {
                 />
               ))
             ) : (
-              <p>Posts zijn aan het laden...</p>
+              <p>Er zijn nog geen posts geplaatst.</p>
             )}
           </section>
           <section className="sidebar-section">

@@ -9,6 +9,8 @@ nav {
   padding: 1rem;
   flex-direction: row !important;
   width: 100%;
+  position: relative;
+  z-index: 10;
 }
 
 .nav-icons {
@@ -62,6 +64,11 @@ nav {
   border-top: none;
 }
 
+.nav-account__overlay-item.inloggen {
+  border: 1.5px solid rgba(var(--bg-rgb), 1) !important;
+  border-radius: 4px !important;
+}
+
 .nav-account__overlay-container {
   position: relative;
 }
@@ -76,10 +83,70 @@ nav {
   .logo {
     display: none;
   }
+  .nav-logo-link {
+    display: none;
+  }
 }
 
 .nav-account-bg {
   padding: 4px;
   background-color: var(--bg);
   border-radius: 50%;
+}
+
+.nav-mobile-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.nav-mobile-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--bg);
+}
+
+.nav-mobile-menu {
+  visibility: hidden;
+  display: flex;
+  position: absolute;
+  top: -100%;
+  right: 0;
+  flex-direction: column;
+  background-color: var(--primary);
+  width: 100%;
+  transition: all 0.3s ease-in-out;
+  z-index: 1;
+}
+
+.nav-mobile-menu.active {
+  visibility: visible;
+  top: 77px;
+}
+
+.nav-mobile-menu__item {
+  padding: 12px 1rem;
+  color: var(--bg) !important;
+  font-weight: 500;
+  border-top: 1px solid rgba(var(--bg-rgb), 0.2);
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .nav-mobile-toggle {
+    display: flex;
+  }
+
+  .nav-account__overlay-container {
+    display: none;
+  }
+  .nav-add-link {
+    display: none;
+  }
 }

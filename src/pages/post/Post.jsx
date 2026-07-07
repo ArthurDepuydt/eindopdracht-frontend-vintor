@@ -18,16 +18,13 @@ import likedIcon from "../../assets/liked.svg";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext.jsx";
 
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 
-const API_HEADERS = {
-  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
-};
+import { fetchPost, updatePost } from "../../api/posts";
+import { createComment } from "../../api/comments";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const DOMAIN = import.meta.env.VITE_API_DOMAIN;
 
 import "swiper/css";
@@ -40,7 +37,11 @@ function Post() {
   const [reactie, setReactie] = useState("");
   const [enrichedPost, setEnrichedPost] = useState(null);
   const [error, setError] = useState(null);
+  const [reactieError, setReactieError] = useState(null);
   const [actualUserId, setActualUserId] = useState(null);
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  const REACTIE_MAX = 500;
 
   const likedPosts = JSON.parse(localStorage.getItem("likedPosts")) || [];
   const isLiked = enrichedPost && likedPosts.includes(enrichedPost.id);
@@ -48,141 +49,91 @@ function Post() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetchPost();
+    loadPost();
     if (isAuth) {
       const token = localStorage.getItem("token");
-      console.log("Token bij useEffect:", token);
       const decodedToken = jwtDecode(token);
       const userId = decodedToken.userId;
       setActualUserId(userId);
     }
   }, []);
 
-  async function fetchPost() {
-    try {
-      const postsResponse = await axios.get(`${BASE_URL}/posts/${params.id}`, {
-        headers: API_HEADERS,
-      });
-      const usersResponse = await axios.get(`${BASE_URL}/users`, {
-        headers: API_HEADERS,
-      });
-      const commentsResponse = await axios.get(`${BASE_URL}/comments`, {
-        headers: API_HEADERS,
-      });
-      const tagsPostResponse = await axios.get(`${BASE_URL}/postTags`, {
-        headers: API_HEADERS,
-      });
-      const tagsResponse = await axios.get(`${BASE_URL}/tags`, {
-        headers: API_HEADERS,
-      });
-      const postImagesResponse = await axios.get(`${BASE_URL}/postImages`, {
-        headers: API_HEADERS,
-      });
-
-      const post = postsResponse.data;
-      const users = usersResponse.data;
-      const comments = commentsResponse.data;
-      const allPostTags = tagsPostResponse.data;
-      const allTags = tagsResponse.data;
-      const postImages = postImagesResponse.data;
-
-      const author = users.find((user) => user.id === post.authorId);
-      const postComments = comments.filter(
-        (comment) => comment.postId === post.id,
-      );
-      const commentsWithAuthors = postComments.map((comment) => {
-        const commentAuthor = users.find(
-          (user) => user.id === comment.authorId,
-        );
-        return {
-          id: comment.id,
-          postId: comment.postId,
-          authorId: comment.authorId,
-          content: comment.content,
-          dateCreated: comment.dateCreated,
-          author: commentAuthor,
-        };
-      });
-      const postTags = allPostTags.filter((pt) => pt.postId === post.id);
-      const tags = postTags.map((pt) => {
-        const tag = allTags.find((t) => t.id === pt.tagId);
-        return tag ? tag.name : null;
-      });
-      const postImageAssembled = postImages
-        .filter((pi) => Number(pi.postId) === post.id)
-        .map((pi) => pi.image);
-      const allImages = postImageAssembled;
-
-      setEnrichedPost({
-        id: post.id,
-        title: post.title,
-        description: post.description,
-        likes: post.likes,
-        images: allImages,
-        dateCreated: post.dateCreated,
-        author: author,
-        comments: commentsWithAuthors,
-        tags: tags,
-        authorId: post.authorId,
-      });
-    } catch (error) {
-      console.error("Er ging iets mis bij het ophalen van de data:", error);
+  async function loadPost() {
+    const [post, error] = await fetchPost(params.id);
+    if (error) {
+      console.error(error);
       setError("Er ging iets mis bij het ophalen van de data.");
+      return;
     }
+    setEnrichedPost(post);
   }
 
-  function toggleLike() {
+  async function toggleLike() {
     const likedPosts = JSON.parse(localStorage.getItem("likedPosts")) || [];
     const alreadyLiked = likedPosts.includes(enrichedPost.id);
 
-    const newLikes = alreadyLiked
-      ? enrichedPost.likes - 1
-      : enrichedPost.likes + 1;
+    const newLikes = Math.max(
+      0,
+      alreadyLiked ? enrichedPost.likes - 1 : enrichedPost.likes + 1,
+    );
 
-    axios
-      .put(
-        `${BASE_URL}/posts/${enrichedPost.id}`,
-        {
-          title: enrichedPost.title,
-          description: enrichedPost.description,
-          likes: newLikes,
-          authorId: enrichedPost.authorId,
-          dateCreated: enrichedPost.dateCreated,
-          id: enrichedPost.id,
-        },
-        { headers: { ...API_HEADERS, Authorization: `Bearer ${token}` } },
-      )
-      .then(() => {
-        const updatedLikedPosts = alreadyLiked
-          ? likedPosts.filter((postId) => postId !== enrichedPost.id)
-          : [...likedPosts, enrichedPost.id];
+    const [, error] = await updatePost(
+      enrichedPost.id,
+      {
+        title: enrichedPost.title,
+        description: enrichedPost.description,
+        likes: newLikes,
+        authorId: enrichedPost.authorId,
+        dateCreated: enrichedPost.dateCreated,
+        id: enrichedPost.id,
+      },
+      token,
+    );
 
-        localStorage.setItem("likedPosts", JSON.stringify(updatedLikedPosts));
-        setEnrichedPost((prev) => ({ ...prev, likes: newLikes }));
-      })
-      .catch((error) => {
-        console.error("Error toggling like:", error);
-      });
+    if (error) {
+      console.error("Error toggling like:", error);
+      return;
+    }
+
+    const updatedLikedPosts = alreadyLiked
+      ? likedPosts.filter((postId) => postId !== enrichedPost.id)
+      : [...likedPosts, enrichedPost.id];
+
+    localStorage.setItem("likedPosts", JSON.stringify(updatedLikedPosts));
+    setEnrichedPost((prev) => ({ ...prev, likes: newLikes }));
   }
 
-  async function createComment(e) {
+  async function submitComment(e) {
     e.preventDefault();
-    try {
-      const postPayload = {
-        postId: parseInt(params.id),
-        authorId: actualUserId,
-        content: reactie,
-        dateCreated: new Date().toISOString(),
-      };
-
-      await axios.post(`${BASE_URL}/comments`, postPayload, {
-        headers: { ...API_HEADERS, Authorization: `Bearer ${token}` },
-      });
-      setReactie("");
-      fetchPost();
-    } catch (error) {
-      console.error("Error submitting new post:", error);
+    if (!reactie.trim()) {
+      setReactieError("Reactie mag niet leeg zijn.");
+      return;
     }
+    if (reactie.trim().length > REACTIE_MAX) {
+      setReactieError(`Reactie mag maximum ${REACTIE_MAX} karakters lang zijn.`);
+      return;
+    }
+
+    const commentPayload = {
+      postId: parseInt(params.id),
+      authorId: actualUserId,
+      content: reactie,
+      dateCreated: new Date().toISOString(),
+    };
+
+    setSubmittingComment(true);
+    const [, error] = await createComment(commentPayload, token);
+    if (error) {
+      console.error(error);
+      setReactieError("Er ging iets mis bij het indienen van de reactie.");
+      setSubmittingComment(false);
+      return;
+    }
+
+    setReactie("");
+    setReactieError(null);
+    setSubmittingComment(false);
+    loadPost();
   }
 
   const username = enrichedPost?.author
@@ -211,7 +162,6 @@ function Post() {
                       className="post-detail__swiper"
                     >
                       {enrichedPost.images.map((image, index) => {
-                        console.log("Image URL:", image);
                         return (
                           <SwiperSlide key={index}>
                             <img
@@ -250,7 +200,7 @@ function Post() {
                         )}
                       </span>
                     </div>
-                    <div className="post-detail__tags-container mt-2 mb-2">
+                    <div className="post-detail__tags-container ">
                       <div className="post-detail__tags">
                         {enrichedPost.tags.map((tag, index) => (
                           <span key={index} className="post-detail__tag">
@@ -276,11 +226,11 @@ function Post() {
                     </span>
                   </div>
                 </section>
-                <section className="post-detail__main mt-5">
+                <section className="post-detail__main">
                   <p className="post-detail__description">
                     {enrichedPost.description}
                   </p>
-                  <hr className="post-detail__divider mt-5 mb-5" />
+                  <hr className="post-detail__divider" />
                 </section>
                 <section className="post-detail__reactions">
                   <h2 className="post-detail__reactions-title">
@@ -319,21 +269,31 @@ function Post() {
                     </article>
                   ))}
 
-                  <hr className="post-detail__divider mt-5 mb-5" />
-                  <form
-                    onSubmit={createComment}
-                    className="post-detail__comment-form"
-                  >
-                    <Input
-                      type="reactie"
-                      id="reactie"
-                      name="reactie"
-                      value={reactie}
-                      setValue={setReactie}
-                      style="text onInput comment-input"
-                      placeholder="Schrijf een reactie"
-                    />
-                  </form>
+                  <hr className="post-detail__divider" />
+                  {isAuth ? (
+                    <form
+                      onSubmit={submitComment}
+                      className="post-detail__comment-form"
+                    >
+                      <Input
+                        type="reactie"
+                        id="reactie"
+                        name="reactie"
+                        value={reactie}
+                        setValue={setReactie}
+                        style="text onInput comment-input"
+                        placeholder="Schrijf een reactie"
+                        disabled={submittingComment}
+                      />
+                      {reactieError && (
+                        <p className="input-error-message">{reactieError}</p>
+                      )}
+                    </form>
+                  ) : (
+                    <p className="post-detail__login-message">
+                      Log in om een reactie te plaatsen.
+                    </p>
+                  )}
                 </section>
               </div>
             ) : (
