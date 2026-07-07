@@ -25,6 +25,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { fetchPost, updatePost } from "../../api/posts";
 import { createComment } from "../../api/comments";
 
+import Reaction from "../../components/reaction/Reaction";
+
 const DOMAIN = import.meta.env.VITE_API_DOMAIN;
 
 import "swiper/css";
@@ -110,7 +112,9 @@ function Post() {
       return;
     }
     if (reactie.trim().length > REACTIE_MAX) {
-      setReactieError(`Reactie mag maximum ${REACTIE_MAX} karakters lang zijn.`);
+      setReactieError(
+        `Reactie mag maximum ${REACTIE_MAX} karakters lang zijn.`,
+      );
       return;
     }
 
@@ -238,35 +242,7 @@ function Post() {
                   </h2>
 
                   {enrichedPost.comments.map((comment) => (
-                    <article className="reaction" key={comment.id}>
-                      <img
-                        src={usericon}
-                        alt="User Icon"
-                        className="reaction-author__image"
-                      />
-                      <div className="reaction-content">
-                        <div className="reaction-author">
-                          <span>
-                            {comment.author
-                              ? comment.author.email.split("@")[0]
-                              : "Onbekend"}
-                          </span>
-                          <span className="reaction-date">
-                            {new Date(comment.dateCreated).toLocaleDateString(
-                              "nl-NL",
-                              {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              },
-                            )}
-                          </span>
-                        </div>
-                        <p className="reaction-description">
-                          {comment.content}
-                        </p>
-                      </div>
-                    </article>
+                    <Reaction key={comment.id} comment={comment} />
                   ))}
 
                   <hr className="post-detail__divider" />
