@@ -18,6 +18,7 @@ import { AuthContext } from "../../context/AuthContext.jsx";
 function Navbar() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const { logout } = useContext(AuthContext);
@@ -31,13 +32,13 @@ function Navbar() {
   useEffect(() => {
     const overlay = document.querySelector(".nav-account__overlay");
     overlay.classList.remove("active");
+    setMobileMenuOpen(false);
   }, [location]);
 
   function handleSearch(e) {
     e.preventDefault();
 
     const searchParam = search.trim();
-    console.log(searchParam);
 
     navigate(`zoeken/${searchParam}`);
   }
@@ -46,7 +47,7 @@ function Navbar() {
     <>
       <nav>
         <div className="container nav-container">
-          <Link to="/">
+          <Link to="/" className="nav-logo-link">
             <img src={Logo} alt="Vintor logo" className="logo" />
           </Link>
           <form onSubmit={handleSearch} className="nav-search">
@@ -109,7 +110,39 @@ function Navbar() {
                 )}
               </div>
             </div>
+            <button
+              className="nav-mobile-toggle"
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              aria-label="Menu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
+        </div>
+        <div className={`nav-mobile-menu ${mobileMenuOpen ? "active" : ""}`}>
+          <Link to="/" className="nav-mobile-menu__item">
+            Home
+          </Link>
+          <Link to="/nieuwe-post" className="nav-mobile-menu__item">
+            Nieuwe post
+          </Link>
+          {isAuth ? (
+            <>
+              <Link to="/mijn-posts" className="nav-mobile-menu__item">
+                Mijn posts
+              </Link>
+              <span className="nav-mobile-menu__item" onClick={logout}>
+                Uitloggen
+              </span>
+            </>
+          ) : (
+            <Link to="/login" className="nav-mobile-menu__item">
+              Inloggen
+            </Link>
+          )}
         </div>
       </nav>
     </>

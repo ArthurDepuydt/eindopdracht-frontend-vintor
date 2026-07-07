@@ -5,7 +5,7 @@ export async function loginUser(email, password) {
     const response = await apiClient.post("/login", { email, password });
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het inloggen:", error);
+    console.error("Inloggen mislukt:", error);
     return [null, error.message];
   }
 }
@@ -19,7 +19,7 @@ export async function registerUser(email, password, username) {
     });
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het registreren:", error);
+    console.error("Registreren is niet gelukt:", error);
     return [null, error.message];
   }
 }
@@ -31,7 +31,7 @@ export async function fetchCurrentUser(id, token) {
     });
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van de gebruiker:", error);
+    console.error("Kon de gebruikersgegevens niet ophalen:", error);
     return [null, error.message];
   }
 }

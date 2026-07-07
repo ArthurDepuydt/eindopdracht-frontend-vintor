@@ -44,6 +44,9 @@ function EditPost() {
   const [titleError, setTitleError] = useState(null);
   const [descriptionError, setDescriptionError] = useState(null);
   const [tagsError, setTagsError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [existingPostTags, setExistingPostTags] = useState([]);
   const [existingPostImages, setExistingPostImages] = useState([]);
@@ -114,6 +117,7 @@ function EditPost() {
     if (postError || tagsError) {
       console.error(postError || tagsError);
       setError("Er is een fout opgetreden bij het ophalen van de post.");
+      setLoading(false);
       return;
     }
 
@@ -129,7 +133,6 @@ function EditPost() {
     const postImages = fetchedImages.filter(
       (img) => Number(img.postId) === parseInt(id),
     );
-    console.log("EditPost postImages na filter:", postImages);
 
     setTitle(post.title);
     setDescription(post.description);
@@ -138,6 +141,7 @@ function EditPost() {
     setPreviewUrls(postImages.map((img) => `${DOMAIN}${img.image}`));
     setExistingPostImages(postImages);
     setExistingPostTags(postTagsCurrent);
+    setLoading(false);
   }
 
   async function loadTags() {
@@ -177,9 +181,12 @@ function EditPost() {
       id: parseInt(id),
     };
 
+    setSubmitting(true);
     const [editedPost, editError] = await updatePost(id, postPayload, token);
     if (editError) {
       console.error(editError);
+      setSubmitError("Post bijwerken is mislukt. Probeer het opnieuw.");
+      setSubmitting(false);
       return;
     }
 
@@ -305,6 +312,9 @@ function EditPost() {
               </div>
             </section>
             <section className="new-post__main">
+              {loading ? (
+                <p>Post is aan het laden...</p>
+              ) : (
               <form className="new-post__form" onSubmit={submitEdit}>
                 <Input
                   label="Titel"
@@ -410,6 +420,9 @@ function EditPost() {
                     )}
                   </div>
                 </div>
+                {submitError && (
+                  <p className="error-message">{submitError}</p>
+                )}
                 <div className="new-post__buttons">
                   <Button
                     type="button"
@@ -418,11 +431,13 @@ function EditPost() {
                   ></Button>
                   <Button
                     type="submit"
-                    value="Opslaan"
+                    value={submitting ? "Bezig met opslaan..." : "Opslaan"}
                     style="primary wide"
+                    disabled={submitting}
                   ></Button>
                 </div>
               </form>
+              )}
               {errors && <p className="error-message">{errors}</p>}
             </section>
           </section>

@@ -34,6 +34,8 @@ function NewPost() {
   const [titleError, setTitleError] = useState(null);
   const [descriptionError, setDescriptionError] = useState(null);
   const [tagsError, setTagsError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
   const MAX_IMAGES = 5;
@@ -162,12 +164,10 @@ function NewPost() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("Token bij useEffect:", token);
     const decodedToken = jwtDecode(token);
     const userId = decodedToken.userId;
     setActualUserId(userId);
     loadTags();
-    console.log(`Opgehaalde userId uit token: ${userId}`);
   }, []);
 
   async function loadTags() {
@@ -199,9 +199,12 @@ function NewPost() {
       dateCreated: new Date().toISOString(),
     };
 
+    setSubmitting(true);
     const [newPost, postError] = await createPost(postPayload, token);
     if (postError) {
       console.error(postError);
+      setSubmitError("Post aanmaken is mislukt. Probeer het opnieuw.");
+      setSubmitting(false);
       return;
     }
 
@@ -341,6 +344,7 @@ function NewPost() {
                     )}
                   </div>
                 </div>
+                {submitError && <p className="error-message">{submitError}</p>}
                 <div className="new-post__buttons">
                   <Button
                     type="button"
@@ -349,8 +353,9 @@ function NewPost() {
                   ></Button>
                   <Button
                     type="submit"
-                    value="Plaatsen"
+                    value={submitting ? "Bezig met plaatsen..." : "Plaatsen"}
                     style="primary wide"
+                    disabled={submitting}
                   ></Button>
                 </div>
               </form>

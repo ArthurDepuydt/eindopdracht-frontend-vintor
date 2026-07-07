@@ -17,15 +17,12 @@ export default function AuthContextProvider({ children }) {
 
   useEffect(() => {
     async function checkAuth() {
-      console.log("check gebruiker");
       const token = localStorage.getItem("token");
       if (!token) {
-        console.log("geen gebruiker");
         setAuth({ isAuth: false, user: null, status: "done" });
       } else {
         const decodedToken = jwtDecode(token);
         await getUser(decodedToken.userId, token);
-        console.log("wel gebruiker");
       }
     }
     checkAuth();
@@ -34,12 +31,7 @@ export default function AuthContextProvider({ children }) {
   async function loginFunction(e, mail, token) {
     e.preventDefault();
     localStorage.setItem("token", token);
-
-    console.log(localStorage.getItem("token"));
-
     const decoded = jwtDecode(token);
-    console.log(decoded);
-
     await getUser(decoded.userId, token);
     navigate("/mijn-posts");
   }
@@ -59,7 +51,6 @@ export default function AuthContextProvider({ children }) {
       },
       status: "done",
     });
-    console.log("Gebruiker is ingelogd!");
   }
 
   function logoutFunction(e) {
@@ -67,7 +58,6 @@ export default function AuthContextProvider({ children }) {
 
     localStorage.removeItem("token");
 
-    console.log("Gebruiker is uitgelogd!");
     navigate("/");
   }
 

@@ -34,7 +34,6 @@ function Searchpage() {
 
   useEffect(() => {
     sortPosts(sortOption);
-    console.log("Sort option:", sortOption);
   }, [sortOption]);
 
   function sortPosts(option) {
@@ -42,19 +41,16 @@ function Searchpage() {
       const sortedPosts = [...filteredPosts].sort(function (a, b) {
         return new Date(b.dateCreated) - new Date(a.dateCreated);
       });
-      console.log(sortedPosts);
       setFilteredPosts(sortedPosts);
     } else if (option === "likes") {
       const sortedPosts = [...filteredPosts].sort(function (a, b) {
         return b.likes - a.likes;
       });
-      console.log(sortedPosts);
       setFilteredPosts(sortedPosts);
     } else if (option === "comments") {
       const sortedPosts = [...filteredPosts].sort(function (a, b) {
         return b.comments.length - a.comments.length;
       });
-      console.log(sortedPosts);
       setFilteredPosts(sortedPosts);
     } else if (option === "") {
       setFilteredPosts([...searchResults]);
@@ -75,7 +71,6 @@ function Searchpage() {
   }, [query, enrichedPosts]);
 
   useEffect(() => {
-    console.log(filteredPosts);
   }, [filteredPosts]);
 
   return (
@@ -103,7 +98,7 @@ function Searchpage() {
           </div>
           <div className="searchpage-results mt-3">
             {error ? (
-              <p>{error.message}</p>
+              <p className="error-message">{error}</p>
             ) : loading ? (
               <p>Posts zijn aan het laden...</p>
             ) : filteredPosts.length > 0 ? (

@@ -39,6 +39,9 @@ function Post() {
   const [error, setError] = useState(null);
   const [reactieError, setReactieError] = useState(null);
   const [actualUserId, setActualUserId] = useState(null);
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  const REACTIE_MAX = 500;
 
   const likedPosts = JSON.parse(localStorage.getItem("likedPosts")) || [];
   const isLiked = enrichedPost && likedPosts.includes(enrichedPost.id);
@@ -49,7 +52,6 @@ function Post() {
     loadPost();
     if (isAuth) {
       const token = localStorage.getItem("token");
-      console.log("Token bij useEffect:", token);
       const decodedToken = jwtDecode(token);
       const userId = decodedToken.userId;
       setActualUserId(userId);
@@ -107,6 +109,10 @@ function Post() {
       setReactieError("Reactie mag niet leeg zijn.");
       return;
     }
+    if (reactie.trim().length > REACTIE_MAX) {
+      setReactieError(`Reactie mag maximum ${REACTIE_MAX} karakters lang zijn.`);
+      return;
+    }
 
     const commentPayload = {
       postId: parseInt(params.id),
@@ -115,15 +121,18 @@ function Post() {
       dateCreated: new Date().toISOString(),
     };
 
+    setSubmittingComment(true);
     const [, error] = await createComment(commentPayload, token);
     if (error) {
       console.error(error);
       setReactieError("Er ging iets mis bij het indienen van de reactie.");
+      setSubmittingComment(false);
       return;
     }
 
     setReactie("");
     setReactieError(null);
+    setSubmittingComment(false);
     loadPost();
   }
 
@@ -153,7 +162,6 @@ function Post() {
                       className="post-detail__swiper"
                     >
                       {enrichedPost.images.map((image, index) => {
-                        console.log("Image URL:", image);
                         return (
                           <SwiperSlide key={index}>
                             <img
@@ -275,6 +283,7 @@ function Post() {
                         setValue={setReactie}
                         style="text onInput comment-input"
                         placeholder="Schrijf een reactie"
+                        disabled={submittingComment}
                       />
                       {reactieError && (
                         <p className="input-error-message">{reactieError}</p>

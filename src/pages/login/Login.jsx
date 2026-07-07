@@ -19,6 +19,7 @@ function Login() {
   const [loginError, setLoginError] = useState(null);
   const [mailError, setMailError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -49,20 +50,18 @@ function Login() {
       return;
     }
 
+    setSubmitting(true);
     const [data, error] = await loginUser(mail, password);
     if (error) {
       console.error(error);
       setLoginError(
         "Inloggen mislukt. Controleer je gegevens en probeer het opnieuw.",
       );
+      setSubmitting(false);
       return;
     }
     setLoginError(null);
     login(e, mail, data.token);
-
-    console.log(
-      `Gebruiker is ingelogd! Emailadres: ${mail}, Wachtwoord: ${password}`,
-    );
   }
 
   return (
@@ -95,7 +94,12 @@ function Login() {
               error={passwordError}
             />
             {loginError && <p className="input-error-message">{loginError}</p>}
-            <Button value="Inloggen" style="primary " type="submit" />
+            <Button
+              value={submitting ? "Bezig met inloggen..." : "Inloggen"}
+              style="primary "
+              type="submit"
+              disabled={submitting}
+            />
 
             <span>of</span>
             <Button

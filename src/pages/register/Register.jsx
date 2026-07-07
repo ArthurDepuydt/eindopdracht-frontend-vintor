@@ -18,6 +18,8 @@ function Register() {
   const [nameError, setNameError] = useState(null);
   const [mailError, setMailError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
+  const [registerError, setRegisterError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -64,17 +66,19 @@ function Register() {
       return;
     }
 
+    setSubmitting(true);
     const [data, error] = await registerUser(mail, password, name);
     if (error) {
       console.error(error);
+      setRegisterError(
+        "Registreren is niet gelukt. Probeer het later opnieuw.",
+      );
+      setSubmitting(false);
       return;
     }
+    setRegisterError(null);
     setResult(data);
     navigate("/login");
-
-    console.log(
-      `Gebruiker is geregistreerd! Gebruikersnaam: ${name}, Emailadres: ${mail}, Wachtwoord: ${password}`,
-    );
   }
 
   return (
@@ -129,7 +133,15 @@ function Register() {
                 Ik ga akkoord met de privacyverklaring
               </label>
             </div>
-            <Button value="Account aanmaken" style="primary " type="submit" />
+            {registerError && (
+              <p className="input-error-message">{registerError}</p>
+            )}
+            <Button
+              value={submitting ? "Bezig met registreren..." : "Account aanmaken"}
+              style="primary "
+              type="submit"
+              disabled={submitting}
+            />
           </form>
           <span>of</span>
           <div className="w-100">

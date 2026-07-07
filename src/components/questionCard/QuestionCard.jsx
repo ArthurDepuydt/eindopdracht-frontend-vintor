@@ -27,7 +27,6 @@ function QuestionCard({
   onDelete,
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  console.log(image);
   const username = author ? author.split("@")[0] : "Onbekend";
   if (type === "mypost") {
     return (

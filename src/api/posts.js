@@ -7,7 +7,7 @@ export async function createPost(postPayload, token) {
     });
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het aanmaken van de post:", error);
+    console.error("Post aanmaken is mislukt:", error);
     return [null, error.message];
   }
 }
@@ -21,7 +21,7 @@ export async function addPostTag(postId, tagId, token) {
     );
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het koppelen van een tag:", error);
+    console.error("Tag koppelen aan de post is mislukt:", error);
     return [null, error.message];
   }
 }
@@ -36,7 +36,7 @@ export async function uploadPostImage(postId, image, token) {
     });
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het uploaden van een afbeelding:", error);
+    console.error("Afbeelding uploaden is mislukt:", error);
     return [null, error.message];
   }
 }
@@ -46,7 +46,7 @@ export async function fetchTags() {
     const response = await apiClient.get("/tags");
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van de tags:", error);
+    console.error("Kon de tags niet ophalen:", error);
     return [null, error.message];
   }
 }
@@ -102,7 +102,7 @@ export async function fetchPosts() {
     merged.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
     return [merged, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van de data:", error);
+    console.error("Ophalen van de posts is mislukt:", error);
     return [null, error.message];
   }
 }
@@ -114,7 +114,7 @@ export async function deletePost(id, token) {
     });
     return [true, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het verwijderen van de post:", error);
+    console.error("Post verwijderen is niet gelukt:", error);
     return [null, error.message];
   }
 }
@@ -175,7 +175,7 @@ export async function fetchPost(id) {
       null,
     ];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van de data:", error);
+    console.error("Kon de post niet ophalen:", error);
     return [null, error.message];
   }
 }
@@ -187,7 +187,7 @@ export async function updatePost(id, postPayload, token) {
     });
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het bijwerken van de post:", error);
+    console.error("Post bijwerken is mislukt:", error);
     return [null, error.message];
   }
 }
@@ -197,7 +197,7 @@ export async function fetchRawPost(id) {
     const response = await apiClient.get(`/posts/${id}`);
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van de post:", error);
+    console.error("Ophalen van de post is niet gelukt:", error);
     return [null, error.message];
   }
 }
@@ -207,7 +207,7 @@ export async function fetchAllPostTags() {
     const response = await apiClient.get("/postTags");
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van de posttags:", error);
+    console.error("Kon de posttags niet ophalen:", error);
     return [null, error.message];
   }
 }
@@ -219,7 +219,7 @@ export async function removePostTag(postTagId, token) {
     });
     return [true, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het verwijderen van een tag:", error);
+    console.error("Tag verwijderen is mislukt:", error);
     return [null, error.message];
   }
 }
@@ -229,7 +229,7 @@ export async function fetchAllPostImages() {
     const response = await apiClient.get("/postImages");
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van de afbeeldingen:", error);
+    console.error("Ophalen van de afbeeldingen is mislukt:", error);
     return [null, error.message];
   }
 }
@@ -241,10 +241,7 @@ export async function removePostImage(imageId, token) {
     });
     return [true, null];
   } catch (error) {
-    console.error(
-      "Er ging iets mis bij het verwijderen van een afbeelding:",
-      error,
-    );
+    console.error("Kon de afbeelding niet verwijderen:", error);
     return [null, error.message];
   }
 }
@@ -291,7 +288,7 @@ export async function fetchUserPosts(userId) {
 
     return [merged, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het ophalen van je posts:", error);
+    console.error("Kon je posts niet ophalen:", error);
     return [null, error.message];
   }
 }

@@ -7,7 +7,7 @@ export async function createComment(commentPayload, token) {
     });
     return [response.data, null];
   } catch (error) {
-    console.error("Er ging iets mis bij het plaatsen van de reactie:", error);
+    console.error("Reactie plaatsen is mislukt:", error);
     return [null, error.message];
   }
 }
