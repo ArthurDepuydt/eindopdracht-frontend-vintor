@@ -62,6 +62,11 @@ nav {
   border-top: none;
 }
 
+.nav-account__overlay-item.inloggen {
+  border: 1.5px solid rgba(var(--bg-rgb), 1) !important;
+  border-radius: 4px !important;
+}
+
 .nav-account__overlay-container {
   position: relative;
 }

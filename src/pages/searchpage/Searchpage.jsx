@@ -7,7 +7,7 @@ import usericon from "../../assets/usericon.svg";
 import Fuse from "fuse.js";
 
 import { useEffect, useState } from "react";
-import fetchPosts from "../../hooks/fetchPosts";
+import { fetchPosts } from "../../api/posts";
 
 import { useParams } from "react-router-dom";
 const DOMAIN = import.meta.env.VITE_API_DOMAIN;
@@ -17,8 +17,10 @@ function Searchpage() {
 
   const [enrichedPosts, setEnrichedPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState("");
 
   useEffect(() => {
     async function initialisation() {
@@ -31,14 +33,45 @@ function Searchpage() {
   }, []);
 
   useEffect(() => {
+    sortPosts(sortOption);
+    console.log("Sort option:", sortOption);
+  }, [sortOption]);
+
+  function sortPosts(option) {
+    if (option === "date") {
+      const sortedPosts = [...filteredPosts].sort(function (a, b) {
+        return new Date(b.dateCreated) - new Date(a.dateCreated);
+      });
+      console.log(sortedPosts);
+      setFilteredPosts(sortedPosts);
+    } else if (option === "likes") {
+      const sortedPosts = [...filteredPosts].sort(function (a, b) {
+        return b.likes - a.likes;
+      });
+      console.log(sortedPosts);
+      setFilteredPosts(sortedPosts);
+    } else if (option === "comments") {
+      const sortedPosts = [...filteredPosts].sort(function (a, b) {
+        return b.comments.length - a.comments.length;
+      });
+      console.log(sortedPosts);
+      setFilteredPosts(sortedPosts);
+    } else if (option === "") {
+      setFilteredPosts([...searchResults]);
+    }
+  }
+
+  useEffect(() => {
     const fuse = new Fuse(enrichedPosts, {
       keys: ["title", "description", "tags"],
       includeScore: true,
       threshold: 0.3,
     });
 
-    setFilteredPosts(fuse.search(query).map((result) => result.item));
-    console.log("Filtered posts:", filteredPosts);
+    const results = fuse.search(query).map((result) => result.item);
+    setSearchResults(results);
+    setFilteredPosts(results);
+    setSortOption("");
   }, [query, enrichedPosts]);
 
   useEffect(() => {
@@ -57,6 +90,8 @@ function Searchpage() {
               name="filter"
               className="searchpage-select"
               id="filter-select"
+              onChange={(e) => setSortOption(e.target.value)}
+              value={sortOption}
             >
               <option value="" selected>
                 Sorteren

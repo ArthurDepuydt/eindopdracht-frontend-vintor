@@ -4,7 +4,7 @@ import QuestionCard from "../../components/questionCard/QuestionCard";
 import Sidebar from "../../components/sidebar/Sidebar";
 import usericon from "../../assets/usericon.svg";
 
-import fetchPosts from "../../hooks/fetchPosts";
+import { fetchPosts } from "../../api/posts";
 
 const DOMAIN = import.meta.env.VITE_API_DOMAIN;
 

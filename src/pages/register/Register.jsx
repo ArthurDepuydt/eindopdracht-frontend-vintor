@@ -8,13 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 import flairlogin from "../../assets/flairlogin.svg";
 
-import axios from "axios";
-
-const API_HEADERS = {
-  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
-};
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { registerUser } from "../../api/auth";
 
 function Register() {
   const [mail, setMail] = useState("");
@@ -70,24 +64,13 @@ function Register() {
       return;
     }
 
-    try {
-      const registerPost = await axios.post(
-        `${BASE_URL}/users`,
-        {
-          email: mail,
-          password: password,
-          username: name,
-        },
-        {
-          headers: API_HEADERS,
-        },
-      );
-      setResult(registerPost.data);
-      navigate("/login");
-      console.log(registerPost.data);
-    } catch (error) {
+    const [data, error] = await registerUser(mail, password, name);
+    if (error) {
       console.error(error);
+      return;
     }
+    setResult(data);
+    navigate("/login");
 
     console.log(
       `Gebruiker is geregistreerd! Gebruikersnaam: ${name}, Emailadres: ${mail}, Wachtwoord: ${password}`,
@@ -146,11 +129,7 @@ function Register() {
                 Ik ga akkoord met de privacyverklaring
               </label>
             </div>
-            <Button
-              value="Account aanmaken"
-              style="primary mt-1"
-              type="submit"
-            />
+            <Button value="Account aanmaken" style="primary " type="submit" />
           </form>
           <span>of</span>
           <div className="w-100">

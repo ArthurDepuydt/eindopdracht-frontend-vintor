@@ -6,7 +6,9 @@ import AccountDark from "../../assets/accountdark.svg";
 import { useState } from "react";
 import Input from "../input/Input";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import { useEffect } from "react";
 
 import { Link } from "react-router-dom";
 
@@ -16,6 +18,7 @@ import { AuthContext } from "../../context/AuthContext.jsx";
 function Navbar() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const location = useLocation();
 
   const { logout } = useContext(AuthContext);
   const { isAuth } = useContext(AuthContext);
@@ -24,6 +27,11 @@ function Navbar() {
     const overlay = document.querySelector(".nav-account__overlay");
     overlay.classList.toggle("active");
   }
+
+  useEffect(() => {
+    const overlay = document.querySelector(".nav-account__overlay");
+    overlay.classList.remove("active");
+  }, [location]);
 
   function handleSearch(e) {
     e.preventDefault();
@@ -76,12 +84,29 @@ function Navbar() {
               )}
 
               <div className="nav-account__overlay">
-                <Link to="/mijn-posts" className="nav-account__overlay-item">
-                  Mijn posts
-                </Link>
-                <span className="nav-account__overlay-item" onClick={logout}>
-                  Uitloggen
-                </span>
+                {isAuth ? (
+                  <>
+                    <Link
+                      to="/mijn-posts"
+                      className="nav-account__overlay-item"
+                    >
+                      Mijn posts
+                    </Link>
+                    <span
+                      className="nav-account__overlay-item"
+                      onClick={logout}
+                    >
+                      Uitloggen
+                    </span>
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="nav-account__overlay-item inloggen"
+                  >
+                    Inloggen
+                  </Link>
+                )}
               </div>
             </div>
           </div>

@@ -2,13 +2,9 @@ import React, { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-import axios from "axios";
+import { fetchCurrentUser } from "../api/auth";
 
 export const AuthContext = createContext(null);
-
-const API_HEADERS = {
-  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
-};
 
 export default function AuthContextProvider({ children }) {
   const [auth, setAuth] = useState({
@@ -49,30 +45,21 @@ export default function AuthContextProvider({ children }) {
   }
 
   async function getUser(id, token) {
-    try {
-      const actualUser = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/users/${id}`,
-        {
-          headers: {
-            ...API_HEADERS,
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      setAuth({
-        isAuth: true,
-        user: {
-          username: actualUser.data.username,
-          email: actualUser.data.email,
-          id: actualUser.data.id,
-        },
-        status: "done",
-      });
-      console.log("Gebruiker is ingelogd!");
-    } catch (error) {
+    const [user, error] = await fetchCurrentUser(id, token);
+    if (error) {
       console.error(error);
+      return;
     }
+    setAuth({
+      isAuth: true,
+      user: {
+        username: user.username,
+        email: user.email,
+        id: user.id,
+      },
+      status: "done",
+    });
+    console.log("Gebruiker is ingelogd!");
   }
 
   function logoutFunction(e) {

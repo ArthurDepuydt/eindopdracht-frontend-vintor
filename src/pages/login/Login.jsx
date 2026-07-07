@@ -4,27 +4,19 @@ import { useState } from "react";
 import Input from "../../components/input/Input";
 import Button from "../../components/button/Button";
 
-import { useNavigate } from "react-router-dom";
-
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext.jsx";
 
-import axios from "axios";
+import { loginUser } from "../../api/auth";
 
 import flairlogin from "../../assets/flairlogin.svg";
-
-const API_HEADERS = {
-  "novi-education-project-id": import.meta.env.VITE_API_PROJECT_ID,
-};
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Login() {
   const { login } = useContext(AuthContext);
 
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
-  const [result, setResult] = useState(null);
+  const [loginError, setLoginError] = useState(null);
   const [mailError, setMailError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
 
@@ -57,23 +49,16 @@ function Login() {
       return;
     }
 
-    try {
-      const loginPost = await axios.post(
-        `${BASE_URL}/login`,
-        {
-          email: mail,
-          password: password,
-        },
-        {
-          headers: API_HEADERS,
-        },
-      );
-      setResult(loginPost.data);
-      console.log(loginPost.data.token);
-      login(e, mail, loginPost.data.token);
-    } catch (error) {
+    const [data, error] = await loginUser(mail, password);
+    if (error) {
       console.error(error);
+      setLoginError(
+        "Inloggen mislukt. Controleer je gegevens en probeer het opnieuw.",
+      );
+      return;
     }
+    setLoginError(null);
+    login(e, mail, data.token);
 
     console.log(
       `Gebruiker is ingelogd! Emailadres: ${mail}, Wachtwoord: ${password}`,
@@ -109,7 +94,9 @@ function Login() {
               placeholder="Wachtwoord"
               error={passwordError}
             />
-            <Button value="Inloggen" style="primary mt-1" type="submit" />
+            {loginError && <p className="input-error-message">{loginError}</p>}
+            <Button value="Inloggen" style="primary " type="submit" />
+
             <span>of</span>
             <Button
               value="Account aanmaken"
