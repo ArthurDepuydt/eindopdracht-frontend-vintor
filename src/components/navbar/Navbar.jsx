@@ -24,6 +24,16 @@ function Navbar() {
   const { logout } = useContext(AuthContext);
   const { isAuth } = useContext(AuthContext);
 
+  useEffect(() => {
+    if (location.pathname.startsWith("/zoeken/")) {
+      console.log(location.pathname);
+      const query = decodeURIComponent(
+        location.pathname.replace("/zoeken/", ""),
+      );
+      setSearch(query);
+    }
+  }, [location]);
+
   function clickAccount() {
     const overlay = document.querySelector(".nav-account__overlay");
     overlay.classList.toggle("active");

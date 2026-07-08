@@ -36,6 +36,8 @@ function Searchpage() {
     sortPosts(sortOption);
   }, [sortOption]);
 
+
+
   function sortPosts(option) {
     if (option === "date") {
       const sortedPosts = [...filteredPosts].sort(function (a, b) {
@@ -68,10 +70,10 @@ function Searchpage() {
     setSearchResults(results);
     setFilteredPosts(results);
     setSortOption("");
+    
   }, [query, enrichedPosts]);
 
-  useEffect(() => {
-  }, [filteredPosts]);
+  useEffect(() => {}, [filteredPosts]);
 
   return (
     <>
