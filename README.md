@@ -25,7 +25,7 @@ Belangrijkste functionaliteiten:
 
 ## Screenshot
 
-[Home](./src/docs/home.png)
+[Home](./public/home.png)
 
 ## Gebruikte technieken en frameworks
 
@@ -37,9 +37,8 @@ Belangrijkste functionaliteiten:
 - **React Select** — dropdown-component voor het selecteren van tags bij het aanmaken van een post.
 - **Swiper** — afbeeldingencarrousel op de postdetailpagina.
 - **Fuse.js** — fuzzy search, gebruikt voor het zoeken naar posts.
-- **ESLint** — controle op codekwaliteit en codestijl.
 
-De applicatie communiceert met de gedeelde NOVI-backend-API (Node/Express + database), die niet in deze repository zit en apart draait.
+De applicatie communiceert met de gedeelde NOVI-backend-API, die niet in deze repository zit en apart draait.
 
 ## Project lokaal opzetten
 
