@@ -15,7 +15,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    if (status === 401 || status === 403) {
+    const url = error.config?.url || "";
+    const method = error.config?.method || "";
+    const isLogin = url === "/login" && method === "post";
+    const isRegister = url === "/users" && method === "post";
+
+    if ((status === 401 || status === 403) && !isLogin && !isRegister) {
       localStorage.removeItem("token");
       alert("Je sessie is verlopen. Log opnieuw in om verder te gaan.");
       window.location.href = "/login";
