@@ -25,7 +25,7 @@ Belangrijkste functionaliteiten:
 
 ## Screenshot
 
-[Home](./public/home.png)
+![alt text](public/home.png)
 
 ## Gebruikte technieken en frameworks
 
