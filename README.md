@@ -4,10 +4,10 @@
 
 1. [Inleiding](#inleiding)
 2. [Screenshot](#screenshot)
-3. [Gebruikte technieken en frameworks](#gebruikte-technieken-en-frameworks)
-4. [Project lokaal opzetten](#project-lokaal-opzetten)
-5. [Inloggegevens](#inloggegevens)
-6. [Overige npm-commando's](#overige-npm-commandos)
+3. [Benodigdheden](#benodigdheden)
+4. [De applicatie draaien](#de-applicatie-draaien)
+5. [Overige commando's](#overige-npm-commandos)
+6. [Testgebruikers](#testgebruikers)
 
 ## Inleiding
 
@@ -25,9 +25,11 @@ Belangrijkste functionaliteiten:
 
 ## Screenshot
 
+Homepagina
+
 ![alt text](public/home.png)
 
-## Gebruikte technieken en frameworks
+## Benodigdheden
 
 - **React 19** — library voor het bouwen van de UI met componenten.
 - **Vite** — build tool en development server.
@@ -37,20 +39,17 @@ Belangrijkste functionaliteiten:
 - **React Select** — dropdown-component voor het selecteren van tags bij het aanmaken van een post.
 - **Swiper** — afbeeldingencarrousel op de postdetailpagina.
 - **Fuse.js** — fuzzy search, gebruikt voor het zoeken naar posts.
+- **Node.js** — (versie 18 of hoger) inclusief npm.
 
 De applicatie communiceert met de gedeelde NOVI-backend-API, die niet in deze repository zit en apart draait.
 
-## Project lokaal opzetten
-
-### Vereisten
-
-- [Node.js](https://nodejs.org/) (versie 18 of hoger) inclusief npm.
+## De applicatie draaien
 
 ### Stappen
 
 1. **Repository clonen of downloaden**
 
-   git clone <url-van-deze-repository>
+   git clone [<url-van-deze-repository>](https://github.com/ArthurDepuydt/eindopdracht-frontend-vintor)
    cd Vintor
 
 2. **Dependencies installeren**
@@ -74,15 +73,6 @@ De applicatie communiceert met de gedeelde NOVI-backend-API, die niet in deze re
 
    De applicatie is vervolgens bereikbaar via de URL die in de terminal verschijnt.
 
-## Inloggegevens
-
-Er is een bestaand test-account beschikbaar om de applicatie uit te proberen:
-
-- **E-mailadres:** `ludo@oldtimerclub.be`
-- **Wachtwoord:** `ludo1234`
-
-Je kan ook zelf een nieuw account aanmaken via de registratiepagina.
-
 ## Overige npm-commando's
 
 Naast `npm install` en `npm run dev` zijn de volgende commando's beschikbaar:
@@ -92,3 +82,12 @@ Naast `npm install` en `npm run dev` zijn de volgende commando's beschikbaar:
 `npm run preview` => Start een lokale server die de geoptimaliseerde build uit `dist` serveert, zodat je de productieversie kan bekijken.
 
 `npm run lint` => Controleert de broncode met ESLint op codeerfouten en stijlproblemen.
+
+## Testgebruikers
+
+Er is een bestaand test-account beschikbaar om de applicatie uit te proberen:
+
+- **E-mailadres:** `ludo@oldtimerclub.be`
+- **Wachtwoord:** `ludo1234`
+
+Je kan ook zelf een nieuw account aanmaken via de registratiepagina.
