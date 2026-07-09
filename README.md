@@ -49,27 +49,36 @@ De applicatie communiceert met de gedeelde NOVI-backend-API, die niet in deze re
 
 1. **Repository clonen of downloaden**
 
-   git clone [<url-van-deze-repository>](https://github.com/ArthurDepuydt/eindopdracht-frontend-vintor)
+   ```bash
+   git clone https://github.com/ArthurDepuydt/eindopdracht-frontend-vintor
    cd Vintor
+   ```
 
 2. **Dependencies installeren**
 
+   ```bash
    npm install
+   ```
 
 3. **Omgevingsvariabelen configureren**
 
    Maak in de root van het project een bestand aan met de naam `.env` en vul het volgende in:
 
+   ```env
    VITE_API_BASE_URL=https://novi-backend-api-wgsgz.ondigitalocean.app/api
    VITE_API_DOMAIN=https://novi-backend-api-wgsgz.ondigitalocean.app
    VITE_API_PROJECT_ID=0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601
+   ```
+
    - `VITE_API_BASE_URL` — basis-URL van de API-endpoints (login, posts, comments, ...).
    - `VITE_API_DOMAIN` — domein van de backend, gebruikt om afbeeldingen op te bouwen die de API teruggeeft.
    - `VITE_API_PROJECT_ID` — het project-ID dat hoort bij de NOVI-backend, meegestuurd als header bij elk API-verzoek.
 
 4. **Applicatie starten**
 
+   ```bash
    npm run dev
+   ```
 
    De applicatie is vervolgens bereikbaar via de URL die in de terminal verschijnt.
 
@@ -77,11 +86,11 @@ De applicatie communiceert met de gedeelde NOVI-backend-API, die niet in deze re
 
 Naast `npm install` en `npm run dev` zijn de volgende commando's beschikbaar:
 
-`npm run build` => Bouwt een geoptimaliseerde productieversie van de applicatie in de map `dist`.
-
-`npm run preview` => Start een lokale server die de geoptimaliseerde build uit `dist` serveert, zodat je de productieversie kan bekijken.
-
-`npm run lint` => Controleert de broncode met ESLint op codeerfouten en stijlproblemen.
+```bash
+npm run build    # Bouwt een geoptimaliseerde productieversie van de applicatie in de map dist
+npm run preview  # Start een lokale server die de build uit dist serveert
+npm run lint     # Controleert de broncode met ESLint op codeerfouten en stijlproblemen
+```
 
 ## Testgebruikers
 
