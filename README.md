@@ -51,7 +51,7 @@ De applicatie communiceert met de gedeelde NOVI-backend-API, die niet in deze re
 
    ```bash
    git clone https://github.com/ArthurDepuydt/eindopdracht-frontend-vintor
-   cd Vintor
+   cd eindopdracht-frontend-vintor
    ```
 
 2. **Dependencies installeren**
