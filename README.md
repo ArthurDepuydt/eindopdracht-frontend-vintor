@@ -67,7 +67,7 @@ De applicatie communiceert met de gedeelde NOVI-backend-API, die niet in deze re
    ```env
    VITE_API_BASE_URL=https://novi-backend-api-wgsgz.ondigitalocean.app/api
    VITE_API_DOMAIN=https://novi-backend-api-wgsgz.ondigitalocean.app
-   VITE_API_PROJECT_ID=0aa01fc3-b0dd-4ad7-9f9e-82b0c9688601
+   VITE_API_PROJECT_ID=<jouw-project-ID>
    ```
 
    - `VITE_API_BASE_URL` — basis-URL van de API-endpoints (login, posts, comments, ...).
