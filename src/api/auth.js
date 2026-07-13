@@ -16,6 +16,7 @@ export async function registerUser(email, password, username) {
       email,
       password,
       username,
+      roles: ["user"],
     });
     return [response.data, null];
   } catch (error) {
