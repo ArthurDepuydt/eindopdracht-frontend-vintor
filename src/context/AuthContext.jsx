@@ -40,6 +40,9 @@ export default function AuthContextProvider({ children }) {
     const [user, error] = await fetchCurrentUser(id, token);
     if (error) {
       console.error(error);
+      localStorage.removeItem("token");
+      setAuth({ isAuth: false, user: null, status: "done" });
+      navigate("/");
       return;
     }
     setAuth({
